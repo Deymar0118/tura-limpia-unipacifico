@@ -1,111 +1,33 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Colores Principales del Logo (Tura Limpia) */
+  --color-tl-green-primary: #10b981;  /* Verde vibrante de las hojas y el pin */
+  --color-tl-green-dark: #046d4f;     /* Verde oscuro para textos o contrastes */
+  --color-tl-blue-primary: #0077b6;   /* Azul intenso " */
+  --color-tl-blue-sky: #71BBD1;       /* Azul cielo/agua del isotipo */
+  --color-tl-sun: #f59e0b;            /* Amarillo/Naranja del sol atardecer */
+  
+  /* Colores de Fondo y Texto General */
+  --color-tl-bg: #F7FBFC;             /* Fondo general limpio y claro */
+  --color-tl-dark: #173B4D;           /* Color principal para textos oscuros */
+  
+  /* Tipografías */
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Manrope', sans-serif;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* Colores de Botones y Acciones */
+  --color-btn-bg: #10b981;        /* Color verde normal del botón */
+  --color-btn-hover: #047857;     /* Color verde más oscuro para el hover */
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Colores de ambiente / gradientes suaves */
+  --color-tl-glow-blue: rgba(113, 187, 209, 0.22); /* Azul cielo suave */
+  --color-tl-glow-green: rgba(16, 185, 129, 0.18); /* Verde vibrante suave */
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-body {
-  margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  /* Colores de Texto*/
+  --color-text-main: #0B2545;       /* Azul marino profundo (Azul oscuro) */
+  --color-text-body: #086a83;       /* Gris carbón legible para párrafos y descripciones */
+  --color-text-muted: #0e52b1;      /* Gris azulado suave para textos secundarios y fechas */
+  
+  /* Colores de Texto para Enfasis / Palabras Clave */
+  --color-text-highlight-green: #15803D; /* Verde hoja/isla para resaltar palabras clave (ej: "Buenaventura") */
+  --color-text-highlight-blue: #0284C7;  /* Azul mar para resaltar nombres de la app o enlaces */
 }
