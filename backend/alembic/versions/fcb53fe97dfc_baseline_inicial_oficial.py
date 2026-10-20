@@ -1,8 +1,8 @@
-"""Creacion de tablas del equipo
+"""baseline_inicial_oficial
 
-Revision ID: 23178a5b00c9
-Revises: 08e51033a0c3
-Create Date: 2026-10-20 12:47:44.931900
+Revision ID: fcb53fe97dfc
+Revises: 
+Create Date: 2026-10-20 18:10:54.666262
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '23178a5b00c9'
-down_revision: Union[str, Sequence[str], None] = '08e51033a0c3'
+revision: str = 'fcb53fe97dfc'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
