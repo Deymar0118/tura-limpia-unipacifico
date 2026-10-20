@@ -1,4 +1,5 @@
-from src.models.user import Usuario, PerfilConductor
+
+from src.models.user import Usuario, PerfilConductor, ReporteCiudadano
 from src.models.vehicle import Vehiculo
 from src.models.shift import Turno, AsignacionTurno
 from src.models.sector import Sector, Barrio
@@ -11,6 +12,7 @@ from src.models.crew import CuadrillaBarrio
 __all__ = [
     "Usuario",
     "PerfilConductor",
+    "ReporteCiudadano",
     "Vehiculo",
     "Turno",
     "AsignacionTurno",
