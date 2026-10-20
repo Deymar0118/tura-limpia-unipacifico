@@ -65,8 +65,8 @@ function HeroSection() {
         </ul>
       </div>
 
-      <div className='here__preview' id='robot-ecologico'>
-        <TuraLimpiaPreview/>
+      <div className="hero__preview" id="robot-ecologico">
+        <TuraLimpiaPreview className="tura--landing" />
       </div>
 
     </section>

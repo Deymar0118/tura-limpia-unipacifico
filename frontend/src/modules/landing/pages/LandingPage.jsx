@@ -3,7 +3,9 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {LandingHeader} from '../components/LandingHeader'
 import HeroSection from '../components/HeroSection'
+import SolucionSection from '../components/SolucionSection'
 import ImpactoMetas from '../components/ImpactoMetas'
+import './LandingPage.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -30,10 +32,11 @@ function LandingPage() {
   }, [])
 
   return (
-    <div ref={landingRef}>
+    <div className="landing-page" ref={landingRef}>
       <LandingHeader />
       <main>
         <HeroSection />
+        <SolucionSection />
         <ImpactoMetas />
       </main>
     </div>

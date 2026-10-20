@@ -1,4 +1,4 @@
-import RobotEcologico from '../../../shared/assets/robot-ecologico.png'
+import RobotEcologico from '../../../shared/assets/Robot_ecologico_en_Buenaventura.png'
 import './TuraLimpiaAssistant.css'
 
 const procesamiento = [
@@ -56,9 +56,9 @@ function FileIcon({ tipo }) {
   )
 }
 
-function TuraLimpiaAssistant() {
+function TuraLimpiaAssistant({ className = '' }) {
   return (
-    <div className="tura">
+    <div className={`tura ${className}`.trim()}>
       <svg
         className="tura__lines"
         viewBox="0 0 100 100"

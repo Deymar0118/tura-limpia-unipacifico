@@ -20,14 +20,6 @@
   vector-effect: non-scaling-stroke;
 }
 
-.tura__line {
-  stroke: var(--color-mf-sky);
-  stroke-width: 1.5;
-  stroke-dasharray: 5 7;
-  opacity: 0.4;
-  vector-effect: non-scaling-stroke;
-}
-
 .tura__doc {
   position: absolute;
   display: flex;
@@ -107,6 +99,118 @@
   font-size: 0.72rem;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.tura--landing .tura__figure {
+  isolation: isolate;
+}
+
+.tura--landing .tura__figure::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 12% 8% 28%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(113, 187, 209, 0.24), transparent 72%);
+  filter: blur(10px);
+}
+
+.tura--landing .tura__character {
+  mix-blend-mode: multiply;
+  animation: tura-float 4.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.tura--landing .tura__doc {
+  animation: tura-drift 4s ease-in-out infinite;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.tura--landing .tura__doc:nth-of-type(2) {
+  animation-delay: -1s;
+}
+
+.tura--landing .tura__doc:nth-of-type(3) {
+  animation-delay: -2s;
+}
+
+.tura--landing .tura__doc:nth-of-type(4) {
+  animation-delay: -3s;
+}
+
+.tura--landing .tura__doc:hover {
+  z-index: 1;
+  transform: translateY(-5px) scale(1.04);
+  border-color: var(--color-tl-green-primary);
+  box-shadow: 0 16px 34px rgba(23, 59, 77, 0.16);
+}
+
+.tura--landing .tura__doc svg {
+  flex: 0 0 auto;
+}
+
+.tura--landing .tura__chips {
+  gap: 8px;
+}
+
+.tura--landing .tura__chip {
+  border-color: rgba(16, 185, 129, 0.26);
+  color: #075b47;
+  background: linear-gradient(135deg, #ffffff 15%, #d9f8e8 100%);
+  box-shadow: 0 8px 18px rgba(16, 140, 95, 0.14);
+  animation: tura-chip-pop 500ms both, tura-drift 3.6s ease-in-out infinite;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.tura--landing .tura__chip:nth-child(2) {
+  animation-delay: 100ms, -0.8s;
+}
+
+.tura--landing .tura__chip:nth-child(3) {
+  animation-delay: 200ms, -1.6s;
+}
+
+.tura--landing .tura__chip:nth-child(4) {
+  animation-delay: 300ms, -2.4s;
+}
+
+.tura--landing .tura__chip:nth-child(5) {
+  animation-delay: 400ms, -3.2s;
+}
+
+.tura--landing .tura__chip:hover {
+  transform: translateY(-4px) scale(1.06);
+  background: linear-gradient(135deg, #ffffff 0%, #b9f4cf 100%);
+  box-shadow: 0 12px 24px rgba(16, 140, 95, 0.24);
+}
+
+@keyframes tura-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes tura-drift {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -5px; }
+}
+
+@keyframes tura-chip-pop {
+  from { opacity: 0; scale: 0.88; }
+  to { opacity: 1; scale: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tura--landing .tura__character,
+  .tura--landing .tura__doc,
+  .tura--landing .tura__chip {
+    animation: none;
+    will-change: auto;
+  }
+
+  .tura--landing .tura__doc,
+  .tura--landing .tura__chip {
+    transition: none;
+  }
 }
 
 @media (max-width: 1100px) {
