@@ -1,0 +1,247 @@
+.impacto-metas {
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  padding: 72px 40px 80px;
+  scroll-margin-top: 96px;
+  overflow: hidden;
+
+  /* Fondo global de Tura Limpia */
+  background: var(--color-tl-bg);
+}
+
+
+/* Brillos sutiles similares a los del Hero */
+
+.impacto-metas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  background:
+    radial-gradient(
+      600px 300px at 8% 15%,
+      var(--color-tl-glow-green),
+      transparent 70%
+    ),
+    radial-gradient(
+      600px 340px at 95% 85%,
+      var(--color-tl-glow-blue),
+      transparent 70%
+    );
+
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ========================================
+   ENCABEZADO
+   ======================================== */
+
+.impacto-metas__encabezado {
+  max-width: 720px;
+  margin: 0 auto 40px;
+  text-align: center;
+}
+
+.impacto-metas__etiqueta {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 8px 16px;
+
+  border: 1px solid var(--color-mf-bg-4);
+  border-radius: 999px;
+  background: var(--color-tl-glow-green);
+  color: var(--color-tl-green-dark);
+
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.impacto-metas__encabezado h2 {
+  margin: 0 0 16px;
+
+  font-family: var(--font-display);
+  color: var(--color-text-main);
+
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.impacto-metas__encabezado p {
+  max-width: 620px;
+  margin: 0 auto;
+
+  color: var(--color-text-body);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* ========================================
+   DISTRIBUCIÓN DE LAS TARJETAS
+   ======================================== */
+
+.impacto-metas__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   TARJETAS
+   ======================================== */
+
+.impacto-metas__tarjeta {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 28px 26px;
+
+  border: 1px solid var(--color-mf-bg-4);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 88%);
+
+  box-shadow: 0 8px 24px rgb(23 54 83 / 5%);
+
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+.impacto-metas__tarjeta:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-tl-glow-green);
+  box-shadow: 0 14px 30px rgb(23 54 83 / 9%);
+}
+
+/* ========================================
+   ICONOS
+   ======================================== */
+
+.impacto-metas__icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+  margin-bottom: 20px;
+
+  border: 1px solid var(--color-mf-bg-4);
+  border-radius: 14px;
+
+  /* Un mismo estilo para mantener la armonía */
+  background: var(--color-tl-glow-green);
+  color: var(--color-tl-green-dark);
+}
+
+.impacto-metas__icono svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+}
+
+/* Variante azul para alternar los acentos */
+
+.impacto-metas__icono--azul {
+  background: var(--color-tl-glow-blue);
+  color: var(--color-tl-blue-sky);
+}
+
+/* La variante morada deja de ser necesaria.
+   Puedes usar el estilo base verde en su lugar. */
+
+/* ========================================
+   TÍTULOS Y DESCRIPCIONES
+   ======================================== */
+
+.impacto-metas__tarjeta h3 {
+  margin: 0 0 12px;
+
+  font-family: var(--font-display);
+  color: var(--color-text-main);
+
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.impacto-metas__tarjeta p {
+  margin: 0;
+
+  color: var(--color-text-body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* ========================================
+   TABLET
+   ======================================== */
+
+@media (max-width: 1100px) {
+  .impacto-metas {
+    padding: 60px 28px 64px;
+  }
+
+  .impacto-metas__grid {
+    gap: 20px;
+  }
+
+  .impacto-metas__tarjeta {
+    padding: 26px 22px;
+  }
+}
+
+/* ========================================
+   MÓVILES
+   ======================================== */
+
+@media (max-width: 860px) {
+  .impacto-metas {
+    padding: 48px 20px 60px;
+    scroll-margin-top: 84px;
+  }
+
+  .impacto-metas__grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 600px;
+  }
+
+  .impacto-metas__encabezado {
+    margin-bottom: 30px;
+  }
+
+  .impacto-metas__encabezado h2 {
+    font-size: clamp(1.8rem, 7vw, 2.4rem);
+  }
+
+  .impacto-metas__encabezado p {
+    font-size: 0.95rem;
+  }
+
+  .impacto-metas__tarjeta {
+    padding: 24px 22px;
+  }
+}
+
+/* ========================================
+   ACCESIBILIDAD
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .impacto-metas__tarjeta {
+    transition: none;
+  }
+
+  .impacto-metas__tarjeta:hover {
+    transform: none;
+  }
+}
