@@ -39,10 +39,9 @@ function HeroSection() {
         </h1>
 
         <p className="hero__description">
-          Una plataforma tecnológica orientada al seguimiento en tiempo real,
-          trazabilidad de rutas y control de incidencias para 
-          mejorando la eficiencia sobre el servicio de aseo 
-          en el Distrito de Buenaventura.
+          Un prototipo académico para apoyar la gestión de rutas, el
+          seguimiento operativo y el registro de incidencias del servicio de
+          recolección en el Distrito de Buenaventura.
         </p>
 
         <div className="hero__actions">
@@ -50,8 +49,8 @@ function HeroSection() {
             Saber más
             <span aria-hidden="true">→</span>
           </a>
-          <a className="hero__btn hero__btn--secondary" href="/dashboard">
-            Ver rutas
+          <a className="hero__btn hero__btn--secondary" href="#buscar">
+            Consultar horarios
           </a>
         </div>
 
@@ -65,7 +64,7 @@ function HeroSection() {
         </ul>
       </div>
 
-      <div className='here__preview' id='robot-ecologico'>
+      <div className="hero__preview" id="robot-ecologico">
         <TuraLimpiaPreview/>
       </div>
 
