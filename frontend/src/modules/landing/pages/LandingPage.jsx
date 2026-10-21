@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {LandingHeader} from '../components/LandingHeader'
 import HeroSection from '../components/HeroSection'
 import SolucionSection from '../components/SolucionSection'
+import ContexSection from '../components/ContextSection'
 import ImpactoMetas from '../components/ImpactoMetas'
 import './LandingPage.css'
 
@@ -36,6 +37,7 @@ function LandingPage() {
       <LandingHeader />
       <main>
         <HeroSection />
+        <ContexSection />
         <SolucionSection />
         <ImpactoMetas />
       </main>

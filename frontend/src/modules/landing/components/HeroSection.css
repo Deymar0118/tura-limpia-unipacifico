@@ -63,6 +63,7 @@
 }
 
 .hero__description {
+  font-family: var(--font-sans);
   margin: 0;
   max-width: 46ch;
   color: var(--color-text-body);

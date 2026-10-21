@@ -4,7 +4,7 @@ import './LandingHeader.css'
 
 const navItems = [
   { label: 'Inicio', href: '#inicio' },
-  { label: 'El Contexto', href: '#contexto' },
+  { label: 'Contexto', href: '#contexto' },
   { label: 'Solución', href: '#solucion' },
   { label: 'Características', href: '#caracteristicas' },
   { label: 'Impacto y Metas', href: '#impacto' },
