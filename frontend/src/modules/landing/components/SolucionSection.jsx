@@ -1,4 +1,5 @@
 import "./SolucionSection.css";
+import Operador from "../../../shared/assets/operador.png";
 
 /* Iconos inline (stroke = currentColor). Si ya los tienes en shared/icons.jsx,
    puedes reemplazarlos por esos para mantener consistencia con ImpactoMetas. */
@@ -91,11 +92,21 @@ export default function SolucionSection() {
     >
       <div className="solucion__contenedor">
         <header className="solucion__encabezado">
-          <span className="solucion__etiqueta">Nuestra Solución</span>
+          <span className="solucion__etiqueta">
+            <span className="solucion__etiqueta-punto" aria-hidden="true" />
+            Nuestra Solución
+          </span>
           <h2 id="solucion-titulo" className="solucion__titulo">
             Gestión Centralizada e Inteligente para Pacífico Limpio S.A.S. E.S.P.
           </h2>
         </header>
+
+        <figure className="solucion__visual">
+          <img
+            src={Operador}
+            alt="Operador de Tura Limpia supervisando rutas de recolección desde un computador"
+          />
+        </figure>
 
         <div className="solucion__tarjetas">
           {TARJETAS.map(({ id, titulo, texto, Icono, tono }) => (

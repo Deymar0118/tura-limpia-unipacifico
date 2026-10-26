@@ -12,7 +12,7 @@ const checks = [
 function CheckIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <circle cx="8" cy="8" r="7.2" fill="var(--color-tl-bg-3, #E6F4EA)" />
+      <circle cx="8" cy="8" r="7.2" fill="#EAF1F3" />
       <path
         d="M4.4 8.3 6.6 10.5 11.7 5.4"
         stroke="var(--color-tl-primary, #10B981)"

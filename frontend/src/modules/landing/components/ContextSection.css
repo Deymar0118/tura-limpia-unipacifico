@@ -1,6 +1,6 @@
 .landing-section {
   padding: 50px 40px;
-  background: var(--color-tl-bg);
+  background: #eff7fa;
 }
 
 .landing-section__inner{
@@ -24,23 +24,25 @@
 }
 
 .badge-dot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--color-tl-dark);
-  box-shadow: 0 0 0 4px var(--color-tl-blue-primary);
+  background: var(--color-tl-blue-primary);
+  box-shadow: 0 0 0 4px var(--color-tl-glow-blue);
 }
 
 .landing-kicker {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: var(--color-text-main);
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--color-tl-glow-blue);
+  color: var(--color-tl-blue-primary);
   font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 
@@ -49,6 +51,7 @@
   margin: 10px 0 14px;
   color: var(--color-text-main);
   font-size: clamp(2rem, 3.5vw, 3.1rem);
+  font-weight: 700;
   letter-spacing: -0.045em;
   line-height: 1.08;
 }
@@ -74,9 +77,6 @@
   height: auto;
   max-width: 500px;
   object-fit: contain;
-  border-radius: 12px;
-  box-shadow: 0 0 0 1px var(--color-tl-green-primary),
-              0 0 20px color-mix(in srgb, var(--color-tl-green-primary) 40%, transparent);
 }
 
 .landing-steps {
@@ -92,9 +92,16 @@
   background-color: #ffffff;
   border-radius: 16px; 
   padding: 1.4rem; 
-  box-shadow: 0 0 0 1px var(--color-tl-green-primary),
-              0 0 20px color-mix(in srgb, var(--color-tl-green-primary) 20%, transparent);
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow 180ms ease;
   gap: 0.8rem;
+}
+
+@media (hover: hover) {
+  .landing-step:hover {
+    box-shadow: 0 0 0 1px var(--color-tl-green-primary),
+                0 0 20px color-mix(in srgb, var(--color-tl-green-primary) 20%, transparent);
+  }
 }
 
 .landing-step h3{
@@ -110,7 +117,7 @@
   place-items: center;
   border-radius: 30px;
   color: #ffffff;
-  background: var(--color-tl-green-primary);
+  background: var(--color-tl-blue-primary);
   font-size: 0.72rem;
   font-weight: 800;
 }
@@ -142,4 +149,5 @@
     width: 100%; 
     max-width: 100%;
   }
+
 }

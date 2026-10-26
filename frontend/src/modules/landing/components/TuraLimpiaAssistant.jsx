@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import RobotEcologico from '../../../shared/assets/Robot_ecologico_en_Buenaventura.png'
 import './TuraLimpiaAssistant.css'
 
@@ -10,10 +11,10 @@ const procesamiento = [
 ]
 
 const documentos = [
-  { nombre: 'optimizacion_rutas', pos: 'tl', tipo: 'map' },
-  { nombre: 'mapa_puntos_criticos', pos: 'tr', tipo: 'map' },
-  { nombre: 'telemetria_flota', pos: 'bl', tipo: 'data' },
-  { nombre: 'registro_incidencias', pos: 'br', tipo: 'doc' },
+  { nombre: 'Optimización de rutas', pos: 'tl', tipo: 'map' },
+  { nombre: 'Mapa de puntos críticos', pos: 'tr', tipo: 'map' },
+  { nombre: 'Telemetría de flota', pos: 'bl', tipo: 'data' },
+  { nombre: 'Registro de incidencias', pos: 'br', tipo: 'doc' },
 ]
 
 function FileIcon({ tipo }) {
@@ -57,6 +58,8 @@ function FileIcon({ tipo }) {
 }
 
 function TuraLimpiaAssistant({ className = '' }) {
+  const [orbitActive, setOrbitActive] = useState(false)
+
   return (
     <div className={`tura ${className}`.trim()}>
       <svg
@@ -78,11 +81,15 @@ function TuraLimpiaAssistant({ className = '' }) {
         </div>
       ))}
 
-      <div className="tura__figure">
+      <div
+        className={`tura__figure${orbitActive ? ' is-orbiting' : ''}`}
+        onPointerLeave={() => setOrbitActive(false)}
+      >
         <img
           className="tura__character"
           src={RobotEcologico}
           alt="Proceso de gestión Tura Limpia"
+          onPointerEnter={() => setOrbitActive(true)}
         />
         <ul className="tura__chips">
           {procesamiento.map((item) => (

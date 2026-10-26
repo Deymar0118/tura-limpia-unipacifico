@@ -1,8 +1,8 @@
 .tura {
   position: relative;
   width: 100%;
-  max-width: 540px;
-  min-height: 520px;
+  max-width: 600px;
+  min-height: 560px;
 }
 
 .tura__lines {
@@ -66,7 +66,7 @@
   top: 50%;
   left: 50%;
   display: flex;
-  width: min(320px, 72%);
+  width: min(380px, 80%);
   flex-direction: column;
   align-items: center;
   gap: 12px;
@@ -74,7 +74,7 @@
 }
 
 .tura__character {
-  width: clamp(180px, 18vw, 280px);
+  width: clamp(220px, 24vw, 360px);
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 16px 24px rgba(23, 59, 77, 0.2));
@@ -99,7 +99,8 @@
   box-shadow: 0 6px 16px rgba(23, 59, 77, 0.06);
   font-size: 0.72rem;
   font-weight: 600;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
 }
 
 .tura--landing .tura__figure {
@@ -159,30 +160,70 @@
   color: #075b47;
   background: linear-gradient(135deg, #ffffff 15%, #d9f8e8 100%);
   box-shadow: 0 8px 18px rgba(16, 140, 95, 0.14);
-  animation: tura-chip-pop 500ms both, tura-drift 3.6s ease-in-out infinite;
-  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  animation: tura-chip-pop 500ms both;
+  transition: transform 450ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .tura--landing .tura__chip:nth-child(2) {
-  animation-delay: 100ms, -0.8s;
+  animation-delay: 100ms;
 }
 
 .tura--landing .tura__chip:nth-child(3) {
-  animation-delay: 200ms, -1.6s;
+  animation-delay: 200ms;
 }
 
 .tura--landing .tura__chip:nth-child(4) {
-  animation-delay: 300ms, -2.4s;
+  animation-delay: 300ms;
 }
 
 .tura--landing .tura__chip:nth-child(5) {
-  animation-delay: 400ms, -3.2s;
+  animation-delay: 400ms;
 }
 
-.tura--landing .tura__chip:hover {
-  transform: translateY(-4px) scale(1.06);
-  background: linear-gradient(135deg, #ffffff 0%, #b9f4cf 100%);
-  box-shadow: 0 12px 24px rgba(16, 140, 95, 0.24);
+@media (hover: hover) and (min-width: 861px) and (prefers-reduced-motion: no-preference) {
+  .tura--landing .tura__figure.is-orbiting .tura__chips {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+
+  .tura--landing .tura__figure.is-orbiting .tura__chip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    animation: tura-chip-orbit 24s linear infinite;
+    pointer-events: auto;
+  }
+
+  .tura--landing .tura__figure.is-orbiting .tura__chip:nth-child(2) {
+    animation-delay: -4.8s;
+  }
+
+  .tura--landing .tura__figure.is-orbiting .tura__chip:nth-child(4) {
+    animation-delay: -9.6s;
+  }
+
+  .tura--landing .tura__figure.is-orbiting .tura__chip:nth-child(3) {
+    animation-delay: -14.4s;
+  }
+
+  .tura--landing .tura__figure.is-orbiting .tura__chip:nth-child(5) {
+    animation-delay: -19.2s;
+  }
+
+  .tura--landing .tura__chips:has(.tura__chip:hover) .tura__chip {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes tura-chip-orbit {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg) translateX(170px) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg) translateX(170px) rotate(-360deg);
+  }
 }
 
 @keyframes tura-float {
@@ -216,8 +257,8 @@
 
 @media (max-width: 1100px) {
   .tura {
-    min-height: 460px;
-    max-width: 480px;
+    min-height: 500px;
+    max-width: 520px;
   }
 
   .tura__doc {
@@ -248,7 +289,7 @@
   }
 
   .tura__character {
-    width: clamp(160px, 44vw, 220px);
+    width: clamp(200px, 60vw, 280px);
   }
 
   .tura__doc {

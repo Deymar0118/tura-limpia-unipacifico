@@ -7,6 +7,7 @@ import SolucionSection from '../components/SolucionSection'
 import ContexSection from '../components/ContextSection'
 import ImpactoMetas from '../components/ImpactoMetas'
 import CaracteristicasSection from '../components/CaracteristicasSection'
+import LandingFooter from '../components/LandingFooter'
 import './LandingPage.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -138,12 +139,15 @@ function LandingPage() {
     <div className="landing-page" ref={landingRef}>
       <LandingHeader />
       <main>
-        <HeroSection />
+        <div className="landing-hero">
+          <HeroSection />
+        </div>
         <ContexSection />
         <SolucionSection />
         <CaracteristicasSection />
         <ImpactoMetas />
       </main>
+      <LandingFooter />
     </div>
   )
 }

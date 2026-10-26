@@ -35,7 +35,7 @@ function ContexSection(){
          <div className="landing-steps-container">        
             <div className="landing-section__heading">
                 <span className="landing-kicker"><span className='badge-dot ' aria-hidden="true" />Contexto</span>
-                <h2 className="dos" id="how-title">Transformando los desafios del servicio publico de aseo.</h2>
+                <h2 className="dos" id="how-title">Transformando los desafíos del servicio público de aseo.</h2>
                 <p className='description'>Plataforma tecnológica diseñada para optimizar las rutas de recolección, supervisar 
                     la flota activa y centralizar la atención de incidencias operativas en Buenaventura.</p>
             </div>    
@@ -43,7 +43,7 @@ function ContexSection(){
                  <img
                  className="tura__character"
                  src={PaneRuta}
-                 alt="Transformación del servicio publico de ase"
+                 alt="Transformación del servicio público de aseo"
                 />
              </div>        
           </div>

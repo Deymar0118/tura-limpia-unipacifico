@@ -5,12 +5,13 @@ import {
   MapPinned,
 } from 'lucide-react'
 
+import CalleCentro from '../../../shared/assets/calle-centro.png'
 import './ImpactoMetas.css'
 
 const indicadores = [
   {
     id: 'tiempos',
-    titulo: 'Reducción de Tiempos',
+    titulo: 'Reducción de tiempos',
     descripcion:
       'Optimización de los tiempos de recolección mediante una mejor planificación de las rutas.',
     icono: Clock3,
@@ -18,7 +19,7 @@ const indicadores = [
   },
   {
     id: 'datos',
-    titulo: 'Toma de Decisiones Basada en Datos',
+    titulo: 'Toma de decisiones basada en datos',
     descripcion:
       'Análisis de reportes e incidencias para identificar retrasos y mejorar la operación.',
     icono: ChartNoAxesColumnIncreasing,
@@ -26,7 +27,7 @@ const indicadores = [
   },
   {
     id: 'cobertura',
-    titulo: 'Mayor Cobertura Urbana',
+    titulo: 'Mayor cobertura urbana',
     descripcion:
       'Seguimiento de las zonas atendidas para identificar oportunidades de mejora en el servicio.',
     icono: MapPinned,
@@ -43,7 +44,8 @@ function ImpactoMetas() {
     >
       <div className="impacto-metas__encabezado">
         <span className="impacto-metas__etiqueta">
-          Impacto y Metas
+          <span className="impacto-metas__etiqueta-punto" aria-hidden="true" />
+          Impacto y metas
         </span>
 
         <h2 id="impacto-metas-titulo">
@@ -55,6 +57,10 @@ function ImpactoMetas() {
           de la recolección de residuos en Buenaventura.
         </p>
       </div>
+
+      <figure className="impacto-metas__visual" aria-hidden="true">
+        <img src={CalleCentro} alt="" />
+      </figure>
 
       <div className="impacto-metas__grid">
         {indicadores.map((indicador) => {

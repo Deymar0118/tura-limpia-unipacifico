@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import TuraLimpiaLogo from '../../../shared/ui/TuraLimpiaLogo';
+import TuraLimpiaLogo from '../../../shared/assets/TuraLimpiaLogo.png';
 import './LandingHeader.css'
 
 const navItems = [
@@ -20,7 +20,7 @@ export const LandingHeader = () => {
       <nav className="landing-nav" aria-label="Navegación principal">
         <a className="landing-nav__brand" href="#inicio">
           <span className="landing-nav__logo">
-            <TuraLimpiaLogo />
+            <img src={TuraLimpiaLogo} alt="" width="32" height="32" />
           </span>
           <span className="landing-nav__name">Tura Limpia</span>
         </a>
@@ -29,7 +29,10 @@ export const LandingHeader = () => {
 
             <li className="landing-nav__mobile-action">
               <a className="landing-nav__login" href="/login">
-                Iniciar sesión
+                Iniciar Sesión
+              </a>
+              <a className="landing-nav__register" href="/registro">
+                Registrarse
               </a>
            </li>
 
@@ -45,6 +48,9 @@ export const LandingHeader = () => {
         <div className="landing-nav__actions">
           <a className="landing-nav__login" href="/login">
             Iniciar sesión
+          </a>
+          <a className="landing-nav__register" href="/registro">
+            Registrarse
           </a>
 
           <button
