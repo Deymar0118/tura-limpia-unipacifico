@@ -29,9 +29,9 @@ export default function AuthLayout({ title, accent, description, children, foote
         {footer && <p className="auth__footer">{footer}</p>}
       </section>
 
-      <aside className="<TuraLimpiaPreview />">
+      <aside className="auth__visual">
         <div className="auth__preview">
-          <TuraLimpiaPreview />
+          <TuraLimpiaPreview className="tura--landing" />
         </div>
       </aside>
     </main>

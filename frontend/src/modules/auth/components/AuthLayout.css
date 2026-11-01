@@ -110,10 +110,25 @@
   gap: 6px;
 }
 
+.auth-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--color-tl-green-dark);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.auth-toggle-btn:hover {
+  color: var(--color-tl-green-primary);
+}
+
 .auth-field label {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--color-text-main);
+  color: var(--color-tl-green-dark);
 }
 
 .auth-input {
@@ -127,7 +142,7 @@
 }
 
 .auth-input::placeholder {
-  color: var(--color-text-muted);
+  color: #8da4a0;
 }
 
 .auth-input:focus-visible {
@@ -182,6 +197,7 @@
 /* ---------- Columna visual ---------- */
 .auth__visual {
   position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -193,9 +209,15 @@
     radial-gradient(520px 340px at 92% 88%, var(--color-tl-glow-green), transparent 70%);
 }
 
-
-
-
+.auth__preview {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  min-height: 520px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {

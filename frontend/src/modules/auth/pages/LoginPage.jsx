@@ -1,9 +1,12 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
+import { iniciarSesion, obtenerMensajeAuth } from '../services/authService'
 
 export default function LoginPage() {
+  const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -14,10 +17,15 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+
     try {
-      // TODO: la lógica de inicio de sesión la conecta quien trabaja authService
-    } catch {
-      setError('Correo o contraseña incorrectos.')
+      await iniciarSesion({
+        email: form.email.trim(),
+        password: form.password,
+      })
+      navigate('/')
+    } catch (err) {
+      setError(obtenerMensajeAuth(err))
     } finally {
       setLoading(false)
     }
@@ -41,20 +49,31 @@ export default function LoginPage() {
             placeholder="tucorreo@ejemplo.com"
             value={form.email}
             onChange={handleChange}
+            disabled={loading}
             required
           />
         </div>
 
         <div className="auth-field">
-          <label htmlFor="password">Contraseña</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <label htmlFor="password">Contraseña</label>
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="auth-toggle-btn"
+            >
+              {showPassword ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </div>
           <input
             id="password"
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             className="auth-input"
             placeholder="Tu contraseña"
             value={form.password}
             onChange={handleChange}
+            disabled={loading}
             required
           />
         </div>
