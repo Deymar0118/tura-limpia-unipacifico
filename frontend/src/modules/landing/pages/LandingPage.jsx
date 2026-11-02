@@ -6,6 +6,7 @@ import HeroSection from '../components/HeroSection'
 import SolucionSection from '../components/SolucionSection'
 import ContexSection from '../components/ContextSection'
 import ImpactoMetas from '../components/ImpactoMetas'
+import CaracteristicasSection from '../components/CaracteristicasSection'
 import './LandingPage.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -39,6 +40,7 @@ function LandingPage() {
         <HeroSection />
         <ContexSection />
         <SolucionSection />
+        <CaracteristicasSection />
         <ImpactoMetas />
       </main>
     </div>
