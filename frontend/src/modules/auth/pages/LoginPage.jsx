@@ -77,6 +77,9 @@ export default function LoginPage() {
             required
           />
         </div>
+                <Link className="auth-link" to="/recuperar-contrasena">
+                  ¿Olvidaste tu contraseña?
+                </Link>
 
         {error && <p className="auth-error" role="alert">{error}</p>}
 

@@ -236,3 +236,30 @@
     padding: 36px 20px 48px;
   }
 }
+/* ---------- Recuperación de contraseña ---------- */
+.auth-field__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.auth-success {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-text-main);
+  background: var(--color-tl-glow-green);
+  border-radius: 12px;
+}
+
+.auth-link {
+  align-self: flex-start;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-tl-green-dark);
+}
+
+a.auth-btn {
+  text-decoration: none;
+}
