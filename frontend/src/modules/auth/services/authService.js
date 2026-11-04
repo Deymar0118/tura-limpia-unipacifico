@@ -57,3 +57,16 @@ export function obtenerMensajeAuth(error) {
 
   return error?.detail || error?.message || 'No se pudo completar la operación'
 }
+export function solicitarRecuperacion({ email }) {
+  return apiClient('/auth/recuperar-contrasena', {
+    metodo: 'POST',
+    body: { email },
+  })
+}
+
+export function restablecerContrasena({ token, password }) {
+  return apiClient('/auth/restablecer-contrasena', {
+    metodo: 'POST',
+    body: { token, password },
+  })
+}
