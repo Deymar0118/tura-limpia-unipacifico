@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Solución', href: '#solucion' },
   { label: 'Características', href: '#caracteristicas' },
   { label: 'Impacto y Metas', href: '#impacto' },
+  { label: 'Consultar horarios', href: '#buscar' },
 ]
 
 

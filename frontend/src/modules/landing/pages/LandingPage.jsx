@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {LandingHeader} from '../components/LandingHeader'
 import HeroSection from '../components/HeroSection'
+import PublicRouteSearch from '../components/PublicRouteSearch'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -33,6 +34,7 @@ function LandingPage() {
       <LandingHeader />
       <main>
         <HeroSection />
+        <PublicRouteSearch />
       </main>
     </div>
   )
