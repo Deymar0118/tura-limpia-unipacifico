@@ -1,10 +1,14 @@
 .auth-page {
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   min-height: 100dvh;
   height: 100dvh;
   overflow: hidden;
   background: var(--color-tl-bg);
+  font-family: var(--font-sans);
 }
 
 
@@ -25,6 +29,18 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+.auth-page__visual .tura__character {
+  width: clamp(280px, 30vw, 440px);
+}
+
+.auth-page__visual .tura__doc-name {
+  font-size: 0.9rem;
+}
+
+.auth-page__visual .tura__chip {
+  font-size: 0.84rem;
 }
 
 .auth-page__panel {
@@ -57,15 +73,42 @@
   align-items: center;
   gap: 16px;
   font-family: var(--font-sans);
-  font-size: 0.78rem;
-  font-weight: 600;
   color: var(--color-tl-dark);
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(4, 109, 79, 0.16);
+}
+
+.auth-right__portal {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.auth-right__portal::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-tl-green-primary);
+  box-shadow: 0 0 0 4px var(--color-tl-glow-green);
 }
 
 .auth-right__support {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid rgba(4, 109, 79, 0.16);
+  border-radius: 999px;
+  background: #e8f5ef;
+  color: var(--color-tl-green-dark);
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .auth-card {
@@ -162,9 +205,13 @@
 }
 
 .auth-card__tab.is-active {
-  background: #fff;
-  color: var(--color-text-main);
-  box-shadow: 0 4px 12px rgba(23, 59, 77, 0.08);
+  background: var(--color-btn-bg);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.auth-card__tab.is-active:hover {
+  background: var(--color-btn-hover);
 }
 
 .auth-card__note {

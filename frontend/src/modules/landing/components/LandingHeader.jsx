@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom'
 import TuraLimpiaLogo from '../../../shared/assets/TuraLimpiaLogo.png';
 import './LandingHeader.css'
 
@@ -28,12 +29,12 @@ export const LandingHeader = () => {
         <ul className={open ? 'landing-nav__links is-open' : 'landing-nav__links'}>
 
             <li className="landing-nav__mobile-action">
-              <a className="landing-nav__login" href="/login">
+              <Link className="landing-nav__login" to="/login" onClick={() => setOpen(false)}>
                 Iniciar Sesión
-              </a>
-              <a className="landing-nav__register" href="/registro">
+              </Link>
+              <Link className="landing-nav__register" to="/registro" onClick={() => setOpen(false)}>
                 Registrarse
-              </a>
+              </Link>
            </li>
 
           {navItems.map((item) => (
@@ -46,12 +47,12 @@ export const LandingHeader = () => {
         </ul>
 
         <div className="landing-nav__actions">
-          <a className="landing-nav__login" href="/login">
+          <Link className="landing-nav__login" to="/login">
             Iniciar sesión
-          </a>
-          <a className="landing-nav__register" href="/registro">
+          </Link>
+          <Link className="landing-nav__register" to="/registro">
             Registrarse
-          </a>
+          </Link>
 
           <button
             type="button"

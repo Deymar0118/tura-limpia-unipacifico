@@ -57,7 +57,7 @@ function FileIcon({ tipo }) {
   )
 }
 
-function TuraLimpiaAssistant({ className = '' }) {
+function TuraLimpiaAssistant({ className = '', characterImage = RobotEcologico }) {
   const [orbitActive, setOrbitActive] = useState(false)
 
   return (
@@ -87,7 +87,7 @@ function TuraLimpiaAssistant({ className = '' }) {
       >
         <img
           className="tura__character"
-          src={RobotEcologico}
+          src={characterImage}
           alt="Proceso de gestión Tura Limpia"
           onPointerEnter={() => setOrbitActive(true)}
         />

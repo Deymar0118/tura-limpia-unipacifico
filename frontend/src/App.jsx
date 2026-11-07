@@ -7,6 +7,7 @@ function App() {
     <BrowserRouter>
       <Routes>      
         <Route path="/login" element={<AuthPage initialTab="login" />} />
+        <Route path="/registro" element={<AuthPage initialTab="registro" />} />
         <Route path="*" element={<LandingPage />} />
       </Routes>
     </BrowserRouter>

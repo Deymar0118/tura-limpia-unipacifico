@@ -19,7 +19,7 @@ function LoginForm({ onSubmit, isSubmitting = false }) {
           className="auth-form__input"
           type="email"
           name="correo"
-          placeholder="correo@hospital.cl"
+          placeholder="nombre@ejemplo.com"
           autoComplete="email"
           value={correo}
           onChange={(event) => setCorreo(event.target.value)}

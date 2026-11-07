@@ -5,7 +5,6 @@ import {
   MapPinned,
 } from 'lucide-react'
 
-import CalleCentro from '../../../shared/assets/calle-centro.png'
 import './ImpactoMetas.css'
 
 const indicadores = [
@@ -58,9 +57,15 @@ function ImpactoMetas() {
         </p>
       </div>
 
-      <figure className="impacto-metas__visual" aria-hidden="true">
-        <img src={CalleCentro} alt="" />
-      </figure>
+      <div className="impacto-metas__visual">
+        <iframe
+          title="Mapa de Buenaventura en Google Maps"
+          src="https://www.google.com/maps?q=Buenaventura%2C+Valle+del+Cauca%2C+Colombia&output=embed"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
+        />
+      </div>
 
       <div className="impacto-metas__grid">
         {indicadores.map((indicador) => {

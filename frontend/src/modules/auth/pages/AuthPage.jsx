@@ -4,12 +4,13 @@ import LoginForm from '../components/LoginForm'
 import RegisterForm from '../components/RegisterForm'
 import { saveSession } from '../../../app/session'
 import TuraLimpiaPreview from '../../landing/components/TuraLimpiaAssistant'
+import RobotLogin from '../../../shared/assets/Robot_login.png'
 import { iniciarSesion, registrarUsuario, obtenerMensajeAuth } from '../services/authService'
 import './AuthPage.css'
 
-function AuthPage() {
+function AuthPage({ initialTab = 'login' }) {
   const navigate = useNavigate()
-  const [modo, setModo] = useState('login')
+  const [modo, setModo] = useState(initialTab)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -72,7 +73,7 @@ function AuthPage() {
   return (
     <main className="auth-page">
       <section className="auth-page__visual" aria-label="Presentación de Tura Limpia">
-        <TuraLimpiaPreview />
+        <TuraLimpiaPreview className="tura--landing" characterImage={RobotLogin} />
       </section>
 
       <section className="auth-page__panel">
@@ -167,7 +168,7 @@ function AuthPage() {
             <p className="auth-right__footer-txt">
               Al {esLogin ? 'iniciar sesión en' : 'registrarte en'} Tura Limpia, aceptas nuestros{' '}
               <a href="#terminos">Términos y Condiciones</a> y la{' '}
-              <a href="#privacidad">Política de Protección de Datos de Salud</a>.
+              <a href="#privacidad">Política de Tratamiento de Datos Personales</a>.
             </p>
             <p className="auth-right__footer-copy">
               © 2026 Tura Limpia Healthcare AI Technologies. Todos los derechos reservados.
