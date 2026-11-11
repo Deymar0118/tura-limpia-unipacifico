@@ -1,5 +1,6 @@
 import logging
 from functools import lru_cache
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger("turalimpia.config")
@@ -13,34 +14,32 @@ class Settings(BaseSettings):
     entorno: str = "desarrollo"
 
 # Conexión al Motor Relacional PostgreSQL
-    database_url: str = (
-        "postgresql+psycopg2://postgres:postgres@localhost:5432/tura_limpia"
-    )
+    database_url: str = "sqlite+aiosqlite:///./tura_limpia.db"
 
     @property
     def database_url_async(self) -> str:
         url = self.database_url
-        if url.startswith("postgresql://"):
-            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        elif url.startswith("postgresql+psycopg2://"):
-            return url.replace(
-                "postgresql+psycopg2://", "postgresql+asyncpg://", 1
-            )
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
         return url
 
 # Seguridad y Firma de Tokens de Acceso (JWT)
-    jwt_secret_key: str = (
-        "turalimpia_dev_secret_key_cambiar_en_produccion_obligatorio"
-    )
+    jwt_secret_key: str = "turalimpia_dev_secret_key_cambiar_en_produccion_obligatorio"
     jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
 
 # Configuración del Protocolo CORS (Cross-Origin Resource Sharing)
     allowed_origins: str = "http://localhost:5173"
 
 # Parámetros de Ingesta del Archivo de Entorno
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+        env_file=".env", 
+        env_file_encoding="utf-8", 
+        case_sensitive=False,
+        extra="ignore"
     )
 
     @property
@@ -67,7 +66,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    settings = Settings()
-    if settings.es_produccion:
-        settings.validar_produccion()
-    return settings
+    return Settings()
