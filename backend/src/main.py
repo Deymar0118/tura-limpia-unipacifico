@@ -1,15 +1,40 @@
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+
+
 from fastapi import FastAPI, Request, Response, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
+from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
+from sqlalchemy.ext.asyncio import AsyncSession, async_session
+from sqlalchemy import text, delete, select
 
 from src.core.config import get_settings
 from src.core.database import crear_tablas, get_db
 
+from src.security import (
+    limiter,
+    hashear_password,
+)
+from src.models.usuario import Usuario
+from src.models.token_revocado import TokenRevocado
+from src.models.rol import Rol
+from src.models.perfil import Perfil
+
+from src.routers.auth import router as auth_router
+
 logger = logging.getLogger("turalimpia.main")
 settings = get_settings()
+
+
+async def purgar_tokens_expirados():
+    async with async_session() as session:
+        resultado = await session.execute(
+            delete(TokenRevocado).where(TokenRevocado.expira_en < datetime.now(timezone.utc))
+        )
+        await session.commit()
+        return resultado.rowcount
 
 
 @asynccontextmanager
@@ -44,6 +69,8 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+app.state.limiter = limiter
+
 # Configuración de políticas de origen cruzado (CORS) para el Frontend en React
 origins = [o.strip() for o in settings.allowed_origins.split(",")]
 
@@ -71,6 +98,8 @@ async def security_headers(request: Request, call_next):
         )
 
     return response
+
+app.include_router(auth_router)
 
 
 @app.get("/", tags=["Root"])
