@@ -9,6 +9,8 @@ import ImpactoMetas from '../components/ImpactoMetas'
 import CaracteristicasSection from '../components/CaracteristicasSection'
 import LandingFooter from '../components/LandingFooter'
 import './LandingPage.css'
+import PublicRouteSearch from '../components/PublicRouteSearch'
+
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -146,6 +148,7 @@ function LandingPage() {
         <SolucionSection />
         <CaracteristicasSection />
         <ImpactoMetas />
+        <PublicRouteSearch />
       </main>
       <LandingFooter />
     </div>

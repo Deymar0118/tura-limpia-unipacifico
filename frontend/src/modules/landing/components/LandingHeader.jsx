@@ -9,6 +9,7 @@ const navItems = [
   { label: 'Solución', href: '#solucion' },
   { label: 'Características', href: '#caracteristicas' },
   { label: 'Impacto y Metas', href: '#impacto' },
+  { label: 'Consultar horarios', href: '#buscar' },
 ]
 
 
@@ -32,9 +33,6 @@ export const LandingHeader = () => {
               <Link className="landing-nav__login" to="/login" onClick={() => setOpen(false)}>
                 Iniciar Sesión
               </Link>
-              <Link className="landing-nav__register" to="/registro" onClick={() => setOpen(false)}>
-                Registrarse
-              </Link>
            </li>
 
           {navItems.map((item) => (
@@ -49,9 +47,6 @@ export const LandingHeader = () => {
         <div className="landing-nav__actions">
           <Link className="landing-nav__login" to="/login">
             Iniciar sesión
-          </Link>
-          <Link className="landing-nav__register" to="/registro">
-            Registrarse
           </Link>
 
           <button

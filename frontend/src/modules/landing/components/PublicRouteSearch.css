@@ -1,0 +1,198 @@
+.public-search {
+  width: min(1120px, calc(100% - 3rem));
+  margin: 0 auto 5rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: 0 18px 48px rgba(23, 59, 77, 0.07);
+  scroll-margin-top: 6rem;
+}
+
+.public-search__intro {
+  max-width: 42rem;
+  margin-bottom: var(--space-8);
+}
+
+.public-search__eyebrow {
+  color: var(--color-tl-green-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.public-search__intro h2 {
+  margin: var(--space-2) 0;
+  color: var(--color-text-main);
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.public-search__intro p,
+.public-search__empty p {
+  margin: 0;
+  color: var(--color-text-body);
+}
+
+.public-search__form {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr auto;
+  align-items: end;
+  gap: var(--space-4);
+}
+
+.public-search__field {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--color-text-main);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.public-search__field > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.public-search__field > span svg {
+  color: var(--color-tl-blue-primary);
+}
+
+.public-search__field input,
+.public-search__field select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: #fff;
+  color: var(--color-text-main);
+}
+
+.public-search__field input::placeholder {
+  color: #617985;
+}
+
+.public-search__field input:focus-visible,
+.public-search__field select:focus-visible {
+  border-color: var(--color-tl-blue-primary);
+  outline: 3px solid rgba(0, 119, 182, 0.2);
+  outline-offset: 1px;
+}
+
+.public-search__submit {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-btn-bg);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.public-search__submit:hover {
+  background: var(--color-btn-hover);
+  transform: translateY(-1px);
+}
+
+.public-search__submit:focus-visible {
+  outline: 3px solid var(--color-tl-blue-sky);
+  outline-offset: 3px;
+}
+
+.public-search__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  color: #365b6a;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.public-search__notice svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--color-tl-blue-primary);
+}
+
+.public-search__updated {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  color: #365b6a;
+  font-size: 0.82rem;
+}
+
+.public-search__updated svg {
+  flex: 0 0 auto;
+  color: var(--color-tl-blue-primary);
+}
+
+.public-search__empty {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid #b9d8e5;
+  border-radius: var(--radius-control);
+  background: var(--color-info-bg);
+}
+
+.public-search__empty-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #d8eff8;
+  color: var(--color-tl-blue-primary);
+}
+
+.public-search__empty h3 {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-main);
+  font-size: 1rem;
+}
+
+@media (max-width: 800px) {
+  .public-search {
+    width: min(100% - 2rem, 44rem);
+    margin-bottom: 3rem;
+  }
+
+  .public-search__form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .public-search__field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .public-search__submit {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .public-search__form {
+    grid-template-columns: 1fr;
+  }
+
+  .public-search__field:first-child,
+  .public-search__submit {
+    grid-column: auto;
+  }
+}
