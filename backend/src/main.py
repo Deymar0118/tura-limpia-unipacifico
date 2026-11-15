@@ -7,6 +7,7 @@ from sqlalchemy import text
 
 from src.core.config import get_settings
 from src.core.database import crear_tablas, get_db
+from src.routers import auth
 
 logger = logging.getLogger("turalimpia.main")
 settings = get_settings()
@@ -71,6 +72,9 @@ async def security_headers(request: Request, call_next):
         )
 
     return response
+
+
+app.include_router(auth.router)
 
 
 @app.get("/", tags=["Root"])
