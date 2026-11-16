@@ -1,5 +1,11 @@
-from src.models.usuario import Rol, Perfil, UsuarioPerfil, Usuario
-from src.models.personal import Trabajador, Conductor, Cuadrilla, TrabajadorCuadrilla
+
+from src.models.usuario import Rol, Perfil, Usuario
+from src.models.personal import (
+    Trabajador,
+    Conductor,
+    Cuadrilla,
+    TrabajadorCuadrilla,
+)
 from src.models.territorio import Barrio
 from src.models.ruta import Macroruta, Microruta, ParadaRuta
 from src.models.vehiculo import Vehiculo
@@ -18,10 +24,10 @@ from src.models.ejecucion import (
 )
 from src.models.novedad import Novedad
 
+
 __all__ = [
     "Rol",
     "Perfil",
-    "UsuarioPerfil",
     "Usuario",
     "Trabajador",
     "Conductor",

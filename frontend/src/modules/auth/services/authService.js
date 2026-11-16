@@ -1,3 +1,4 @@
+
 import {
   apiClient,
   clearAuthTokens,
@@ -5,10 +6,39 @@ import {
 } from '../../../shared/api/apiClient'
 import { clearSession, setSession } from '../../../app/session'
 
-async function autenticar(ruta, body) {
-  const tokens = await apiClient(ruta, {
+// Registro público: crea la cuenta, pero no inicia sesión automáticamente.
+export async function registrarUsuario({
+  nombres,
+  apellidos,
+  nombreUsuario,
+  correo,
+  telefono,
+  contrasena,
+}) {
+  return apiClient('/auth/register', {
     metodo: 'POST',
-    body,
+    body: {
+      nombres,
+      apellidos,
+      nombre_usuario: nombreUsuario,
+      correo,
+      telefono: telefono || null,
+      password: contrasena,
+    },
+  })
+}
+
+// Inicio de sesión: obtiene el JWT y consulta los datos del usuario.
+export async function iniciarSesion({ identificador, password }) {
+  clearAuthTokens()
+  clearSession()
+
+  const tokens = await apiClient('/auth/login', {
+    metodo: 'POST',
+    body: {
+      email: identificador,
+      password,
+    },
   })
 
   setAuthTokens(tokens)
@@ -16,6 +46,7 @@ async function autenticar(ruta, body) {
   try {
     const usuario = await apiClient('/auth/me')
     setSession(usuario)
+
     return { tokens, usuario }
   } catch (error) {
     clearAuthTokens()
@@ -24,49 +55,23 @@ async function autenticar(ruta, body) {
   }
 }
 
-export function iniciarSesion({ email, password }) {
-  return autenticar('/auth/login', {
-    email,
-    password,
-  })
-}
-
-export function registrarUsuario({ nombre, email, password }) {
-  return autenticar('/auth/registro', {
-    nombre,
-    email,
-    password,
-  })
-}
-
+// El backend todavía no tiene endpoint de logout.
+// La sesión se cierra eliminando el token local.
 export async function cerrarSesion() {
-  try {
-    await apiClient('/auth/logout', { metodo: 'POST' })
-  } catch {
-    // Si la llamada falla o el backend no está disponible, aseguramos la limpieza local
-  } finally {
-    clearAuthTokens()
-    clearSession()
-  }
+  clearAuthTokens()
+  clearSession()
 }
 
 export function obtenerMensajeAuth(error) {
   if (Array.isArray(error?.detail)) {
-    return error.detail.map((item) => item.msg).join('. ')
+    return error.detail
+      .map((item) => item.msg)
+      .join('. ')
   }
 
-  return error?.detail || error?.message || 'No se pudo completar la operación'
-}
-export function solicitarRecuperacion({ email }) {
-  return apiClient('/auth/recuperar-contrasena', {
-    metodo: 'POST',
-    body: { email },
-  })
-}
+  if (typeof error?.detail === 'string') {
+    return error.detail
+  }
 
-export function restablecerContrasena({ token, password }) {
-  return apiClient('/auth/restablecer-contrasena', {
-    metodo: 'POST',
-    body: { token, password },
-  })
+  return error?.message || 'No se pudo completar la operación.'
 }

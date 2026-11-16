@@ -51,21 +51,50 @@ app = FastAPI(
 )
 
 
-# CORS: permite los dominios configurados en ALLOWED_ORIGINS.
+# ==========================================================
+# CONFIGURACIÓN CORS
+# ==========================================================
+
+# Obtener los orígenes configurados en las variables de entorno.
 origins = [
     origin.strip()
     for origin in settings.allowed_origins.split(",")
     if origin.strip()
 ]
 
+# Permitir los puertos utilizados por Vite durante el desarrollo.
+origins.extend([
+    "http://localhost:5173",
+    "http://localhost:5174",
+])
+
+# Evitar orígenes duplicados.
+origins = list(dict.fromkeys(origins))
+
+logger.info("Orígenes CORS permitidos: %s", origins)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=[
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS",
+    ],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+    ],
 )
 
+
+# ==========================================================
+# ENCABEZADOS DE SEGURIDAD
+# ==========================================================
 
 @app.middleware("http")
 async def security_headers(
@@ -91,12 +120,23 @@ async def security_headers(
     return response
 
 
-# Routers
+# ==========================================================
+# ROUTERS
+# ==========================================================
+
 app.include_router(auth.router)
 app.include_router(administracion.router)
 
 
-@app.get("/", tags=["Root"], summary="Estado general de la API")
+# ==========================================================
+# RUTA PRINCIPAL
+# ==========================================================
+
+@app.get(
+    "/",
+    tags=["Root"],
+    summary="Estado general de la API",
+)
 async def root():
     return {
         "mensaje": "Bienvenido a TuraLimpia API",
@@ -105,6 +145,10 @@ async def root():
         "status": "active",
     }
 
+
+# ==========================================================
+# HEALTHCHECK
+# ==========================================================
 
 @app.get(
     "/healthcheck",

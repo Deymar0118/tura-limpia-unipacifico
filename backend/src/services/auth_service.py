@@ -53,15 +53,15 @@ class AuthService:
                 detail="El nombre de usuario ya está registrado.",
             )
 
-        perfil = await self.usuario_repository.obtener_perfil_por_rol(
+        rol = await self.usuario_repository.obtener_rol_por_nombre(
             RolEnum.CIUDADANO.value
         )
 
-        if not perfil:
+        if not rol:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=(
-                    "No existe un perfil activo para el rol ciudadano. "
+                    "No existe un rol activo de ciudadano. "
                     "Verifica la inicialización de los roles."
                 ),
             )
@@ -77,7 +77,7 @@ class AuthService:
                     correo=correo,
                     password_hash=password_hash,
                     telefono=datos.telefono,
-                    perfil=perfil,
+                    rol=rol,
                 )
             )
 
@@ -159,10 +159,8 @@ class AuthService:
         id_usuario: str,
     ) -> Usuario:
         try:
-            usuario = (
-                await self.usuario_repository.buscar_por_id(
-                    uuid.UUID(id_usuario)
-                )
+            usuario = await self.usuario_repository.buscar_por_id(
+                uuid.UUID(id_usuario)
             )
         except ValueError:
             usuario = None

@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import './AuthForms.css'
 
@@ -7,20 +8,28 @@ function LoginForm({ onSubmit, isSubmitting = false }) {
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    if (!correo || !contrasena) return
-    onSubmit?.({ correo, contrasena })
+
+    if (!correo.trim() || !contrasena) return
+
+    onSubmit?.({
+      correo: correo.trim(),
+      contrasena,
+    })
   }
 
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
       <label className="auth-form__field">
-        <span className="auth-form__label">Correo electrónico</span>
+        <span className="auth-form__label">
+          Correo electrónico o nombre de usuario
+        </span>
+
         <input
           className="auth-form__input"
-          type="email"
+          type="text"
           name="correo"
-          placeholder="nombre@ejemplo.com"
-          autoComplete="email"
+          placeholder="Correo o nombre de usuario"
+          autoComplete="username"
           value={correo}
           onChange={(event) => setCorreo(event.target.value)}
           required
@@ -29,6 +38,7 @@ function LoginForm({ onSubmit, isSubmitting = false }) {
 
       <label className="auth-form__field">
         <span className="auth-form__label">Contraseña</span>
+
         <input
           className="auth-form__input"
           type="password"
@@ -37,12 +47,15 @@ function LoginForm({ onSubmit, isSubmitting = false }) {
           autoComplete="current-password"
           value={contrasena}
           onChange={(event) => setContrasena(event.target.value)}
-          minLength={8}
           required
         />
       </label>
 
-      <button type="submit" className="auth-form__submit" disabled={isSubmitting}>
+      <button
+        type="submit"
+        className="auth-form__submit"
+        disabled={isSubmitting}
+      >
         {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
       </button>
     </form>

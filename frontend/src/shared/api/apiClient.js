@@ -1,21 +1,33 @@
+
 import { clearSession } from '../../app/session'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || 'http://localhost:8000'
+).replace(/\/$/, '')
 
 const TOKENS_KEY = 'turalimpia.tokens'
-let refreshPromise = null
 
 export class ApiError extends Error {
   constructor(status, detail) {
-    super(typeof detail === 'string' ? detail : 'Error de comunicación con el servidor')
+    const message = Array.isArray(detail)
+      ? detail.map((item) => item.msg).join('. ')
+      : typeof detail === 'string'
+        ? detail
+        : 'Error de comunicación con el servidor'
+
+    super(message)
+
     this.name = 'ApiError'
     this.status = status
     this.detail = detail
   }
 }
 
-export function setAuthTokens({ access_token, refresh_token }) {
-  localStorage.setItem(TOKENS_KEY, JSON.stringify({ access_token, refresh_token }))
+export function setAuthTokens({ access_token }) {
+  localStorage.setItem(
+    TOKENS_KEY,
+    JSON.stringify({ access_token }),
+  )
 }
 
 export function clearAuthTokens() {
@@ -24,7 +36,9 @@ export function clearAuthTokens() {
 
 export function getAccessToken() {
   const raw = localStorage.getItem(TOKENS_KEY)
+
   if (!raw) return null
+
   try {
     return JSON.parse(raw).access_token || null
   } catch {
@@ -32,55 +46,9 @@ export function getAccessToken() {
   }
 }
 
-export function getRefreshToken() {
-  const raw = localStorage.getItem(TOKENS_KEY)
-  if (!raw) return null
-  try {
-    return JSON.parse(raw).refresh_token || null
-  } catch {
-    return null
-  }
-}
-
-async function renovarTokens() {
-  const refreshToken = getRefreshToken()
-  if (!refreshToken) throw new ApiError(401, 'La sesión expiró')
-
-  if (!refreshPromise) {
-    refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    })
-      .then(async (response) => {
-        const data = response.headers.get('content-type')?.includes('application/json')
-          ? await response.json()
-          : null
-
-        if (!response.ok) {
-          throw new ApiError(response.status, data?.detail || 'La sesión expiró')
-        }
-
-        setAuthTokens(data)
-        return data
-      })
-      .finally(() => {
-        refreshPromise = null
-      })
-  }
-
-  return refreshPromise
-}
-
-function cerrarSesionExpirada() {
-  clearAuthTokens()
-  clearSession()
-  if (window.location.pathname !== '/login') window.location.assign('/login')
-}
-
 export async function apiClient(
   ruta,
-  { metodo = 'GET', body, query, reintentar = true } = {},
+  { metodo = 'GET', body, query } = {},
 ) {
   const url = new URL(`${API_BASE_URL}${ruta}`)
 
@@ -92,46 +60,76 @@ export async function apiClient(
     })
   }
 
-  const headers = { Accept: 'application/json' }
+  const headers = {
+    Accept: 'application/json',
+  }
+
   const token = getAccessToken()
-  if (token) headers.Authorization = `Bearer ${token}`
 
-  const esFormData = body instanceof FormData
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
 
-  const config = { method: metodo, headers }
+  const config = {
+    method: metodo,
+    headers,
+  }
+
   if (body !== undefined) {
-    if (!esFormData) {
+    if (body instanceof FormData) {
+      config.body = body
+    } else {
       headers['Content-Type'] = 'application/json'
       config.body = JSON.stringify(body)
-    } else {
-      config.body = body
     }
   }
 
   let response
+
   try {
     response = await fetch(url.toString(), config)
   } catch {
-    throw new ApiError(0, 'No se pudo conectar con el servidor')
+    throw new ApiError(
+      0,
+      'No se pudo conectar con el servidor. Comprueba que FastAPI esté activo.',
+    )
   }
 
   const contentType = response.headers.get('content-type') || ''
-  const data = contentType.includes('application/json') ? await response.json() : null
+
+  let data = null
+
+  if (contentType.includes('application/json')) {
+    try {
+      data = await response.json()
+    } catch {
+      data = null
+    }
+  }
 
   if (!response.ok) {
-    const rutasSinRefresh = ['/auth/login', '/auth/registro', '/auth/refresh', '/auth/logout']
-    const puedeRenovar = response.status === 401 && token && reintentar && !rutasSinRefresh.includes(ruta)
-    if (puedeRenovar) {
-      try {
-        await renovarTokens()
-        return apiClient(ruta, { metodo, body, query, reintentar: false })
-      } catch {
-        cerrarSesionExpirada()
+    const rutasPublicas = [
+      '/auth/login',
+      '/auth/register',
+    ]
+
+    if (
+      response.status === 401 &&
+      token &&
+      !rutasPublicas.includes(ruta)
+    ) {
+      clearAuthTokens()
+      clearSession()
+
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login')
       }
     }
 
-    const detail = data?.detail ?? data?.mensaje ?? 'Solicitud fallida'
-    throw new ApiError(response.status, detail)
+    throw new ApiError(
+      response.status,
+      data?.detail ?? data?.mensaje ?? 'Solicitud fallida',
+    )
   }
 
   return data

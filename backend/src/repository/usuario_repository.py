@@ -5,7 +5,7 @@ from datetime import date
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import Perfil, Rol, Usuario, UsuarioPerfil
+from src.models import Perfil, Rol, Usuario
 
 
 ESTADO_ACTIVO = "activo"
@@ -27,8 +27,7 @@ class UsuarioRepository:
 
         if "@" in identificador:
             condicion = (
-                func.lower(Usuario.correo)
-                == identificador.lower()
+                func.lower(Usuario.correo) == identificador.lower()
             )
         else:
             condicion = (
@@ -71,23 +70,18 @@ class UsuarioRepository:
         )
         return resultado.scalar_one_or_none()
 
-    async def obtener_perfil_por_rol(
+    async def obtener_rol_por_nombre(
         self,
         nombre_rol: str,
-    ) -> Perfil | None:
-        """Obtiene un perfil activo asociado a un rol activo."""
+    ) -> Rol | None:
+        """Obtiene un rol activo por su nombre."""
 
         resultado = await self.db.execute(
-            select(Perfil)
-            .join(Rol, Perfil.id_rol == Rol.id_rol)
-            .where(
+            select(Rol).where(
                 Rol.nombre_rol == nombre_rol,
                 Rol.estado == ESTADO_ACTIVO,
-                Perfil.estado == ESTADO_ACTIVO,
             )
-            .limit(1)
         )
-
         return resultado.scalar_one_or_none()
 
     async def crear_usuario_ciudadano(
@@ -98,9 +92,9 @@ class UsuarioRepository:
         correo: str,
         password_hash: str,
         telefono: str | None,
-        perfil: Perfil,
+        rol: Rol,
     ) -> Usuario:
-        """Crea el usuario y le asigna el perfil ciudadano."""
+        """Crea un usuario y su perfil ciudadano."""
 
         usuario = Usuario(
             nombres=nombres,
@@ -115,13 +109,14 @@ class UsuarioRepository:
         self.db.add(usuario)
         await self.db.flush()
 
-        asignacion = UsuarioPerfil(
+        perfil = Perfil(
             id_usuario=usuario.id_usuario,
-            id_perfil=perfil.id_perfil,
+            id_rol=rol.id_rol,
             fecha_inicio=date.today(),
+            estado=ESTADO_ACTIVO,
         )
 
-        self.db.add(asignacion)
+        self.db.add(perfil)
         await self.db.flush()
 
         return usuario
@@ -137,21 +132,17 @@ class UsuarioRepository:
         consulta = (
             select(Rol.nombre_rol)
             .join(Perfil, Perfil.id_rol == Rol.id_rol)
-            .join(
-                UsuarioPerfil,
-                UsuarioPerfil.id_perfil == Perfil.id_perfil,
-            )
             .where(
-                UsuarioPerfil.id_usuario == id_usuario,
-                UsuarioPerfil.fecha_inicio <= hoy,
+                Perfil.id_usuario == id_usuario,
+                Perfil.fecha_inicio <= hoy,
                 or_(
-                    UsuarioPerfil.fecha_fin.is_(None),
-                    UsuarioPerfil.fecha_fin >= hoy,
+                    Perfil.fecha_fin.is_(None),
+                    Perfil.fecha_fin >= hoy,
                 ),
                 Perfil.estado == ESTADO_ACTIVO,
                 Rol.estado == ESTADO_ACTIVO,
             )
-            .order_by(UsuarioPerfil.fecha_inicio.desc())
+            .order_by(Perfil.fecha_inicio.desc())
             .limit(1)
         )
 

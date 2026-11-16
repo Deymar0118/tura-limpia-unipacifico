@@ -1,3 +1,4 @@
+
 import { clearQueryCache, setQueryCacheScope } from '../shared/api/queryCache'
 
 const SESSION_KEY = 'turalimpia.session'
@@ -18,7 +19,9 @@ export const ETIQUETA_ROL = Object.freeze({
 
 export const getSession = () => {
   const raw = localStorage.getItem(SESSION_KEY)
+
   if (!raw) return null
+
   try {
     return JSON.parse(raw)
   } catch {
@@ -36,15 +39,20 @@ export function saveSession(sesion, { actualizarCache = true } = {}) {
 
 export function updateSession(cambios) {
   const actual = getSession() || {}
-  saveSession({ ...actual, ...cambios }, { actualizarCache: false })
+
+  saveSession(
+    { ...actual, ...cambios },
+    { actualizarCache: false },
+  )
 }
 
-export const setSession = (session) => {
+export function setSession(session) {
   if (session) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+    saveSession(session)
   } else {
-    localStorage.removeItem(SESSION_KEY)
+    clearSession()
   }
+
   return session
 }
 
@@ -60,7 +68,14 @@ export function getRol() {
 
 export function getUsuario() {
   const sesion = getSession()
-  return sesion ? { nombre: sesion.nombre, email: sesion.email, rol: sesion.rol } : null
+
+  return sesion
+    ? {
+        nombre: sesion.nombre,
+        email: sesion.email,
+        rol: sesion.rol,
+      }
+    : null
 }
 
 if (typeof localStorage !== 'undefined') {

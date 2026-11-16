@@ -1,55 +1,110 @@
+
 import { useState, useMemo } from 'react'
 import './AuthForms.css'
 
 const REGLAS_CONTRASENA = [
-  { id: 'longitud', test: (v) => v.length >= 8, texto: 'Al menos 8 caracteres' },
-  { id: 'mayuscula', test: (v) => /[A-Z]/.test(v), texto: 'Una letra mayúscula' },
-  { id: 'minuscula', test: (v) => /[a-z]/.test(v), texto: 'Una letra minúscula' },
-  { id: 'digito', test: (v) => /\d/.test(v), texto: 'Un número' },
-  { id: 'especial', test: (v) => /[^A-Za-z0-9]/.test(v), texto: 'Un carácter especial' },
+  {
+    id: 'longitud',
+    test: (v) => v.length >= 8,
+    texto: 'Al menos 8 caracteres',
+  },
+  {
+    id: 'maximo',
+    test: (v) => new TextEncoder().encode(v).length <= 72,
+    texto: 'Máximo 72 bytes',
+  },
 ]
 
 function RegisterForm({ onSubmit, isSubmitting = false }) {
-  const [nombre, setNombre] = useState('')
+  const [nombres, setNombres] = useState('')
+  const [apellidos, setApellidos] = useState('')
+  const [nombreUsuario, setNombreUsuario] = useState('')
   const [correo, setCorreo] = useState('')
+  const [telefono, setTelefono] = useState('')
   const [contrasena, setContrasena] = useState('')
   const [confirmacion, setConfirmacion] = useState('')
   const [errorConfirmacion, setErrorConfirmacion] = useState('')
   const [mostrarReglas, setMostrarReglas] = useState(false)
 
   const validacion = useMemo(
-    () => REGLAS_CONTRASENA.map((regla) => ({ ...regla, cumplida: regla.test(contrasena) })),
+    () =>
+      REGLAS_CONTRASENA.map((regla) => ({
+        ...regla,
+        cumplida: regla.test(contrasena),
+      })),
     [contrasena],
   )
-  const contrasenaValida = validacion.every((r) => r.cumplida)
+
+  const contrasenaValida = validacion.every((regla) => regla.cumplida)
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    if (!nombre || !correo || !contrasena || !confirmacion) return
 
     if (!contrasenaValida) return
 
     if (contrasena !== confirmacion) {
-      setErrorConfirmacion('Las contraseñas no coinciden')
+      setErrorConfirmacion('Las contraseñas no coinciden.')
       return
     }
 
     setErrorConfirmacion('')
-    onSubmit?.({ nombre, correo, contrasena })
+
+    onSubmit?.({
+      nombres,
+      apellidos,
+      nombreUsuario,
+      correo,
+      telefono,
+      contrasena,
+    })
   }
 
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
       <label className="auth-form__field">
-        <span className="auth-form__label">Nombre completo</span>
+        <span className="auth-form__label">Nombres</span>
         <input
           className="auth-form__input"
           type="text"
-          name="nombre"
-          placeholder="Nombre y apellido"
-          autoComplete="name"
-          value={nombre}
-          onChange={(event) => setNombre(event.target.value)}
+          name="nombres"
+          placeholder="Tus nombres"
+          autoComplete="given-name"
+          value={nombres}
+          onChange={(e) => setNombres(e.target.value)}
+          minLength={2}
+          maxLength={100}
+          required
+        />
+      </label>
+
+      <label className="auth-form__field">
+        <span className="auth-form__label">Apellidos</span>
+        <input
+          className="auth-form__input"
+          type="text"
+          name="apellidos"
+          placeholder="Tus apellidos"
+          autoComplete="family-name"
+          value={apellidos}
+          onChange={(e) => setApellidos(e.target.value)}
+          minLength={2}
+          maxLength={100}
+          required
+        />
+      </label>
+
+      <label className="auth-form__field">
+        <span className="auth-form__label">Nombre de usuario</span>
+        <input
+          className="auth-form__input"
+          type="text"
+          name="nombreUsuario"
+          placeholder="Ej. juanperez"
+          autoComplete="username"
+          value={nombreUsuario}
+          onChange={(e) => setNombreUsuario(e.target.value)}
+          minLength={3}
+          maxLength={50}
           required
         />
       </label>
@@ -63,8 +118,22 @@ function RegisterForm({ onSubmit, isSubmitting = false }) {
           placeholder="nombre@ejemplo.com"
           autoComplete="email"
           value={correo}
-          onChange={(event) => setCorreo(event.target.value)}
+          onChange={(e) => setCorreo(e.target.value)}
           required
+        />
+      </label>
+
+      <label className="auth-form__field">
+        <span className="auth-form__label">Teléfono (opcional)</span>
+        <input
+          className="auth-form__input"
+          type="tel"
+          name="telefono"
+          placeholder="Número de contacto"
+          autoComplete="tel"
+          value={telefono}
+          onChange={(e) => setTelefono(e.target.value)}
+          maxLength={20}
         />
       </label>
 
@@ -77,19 +146,24 @@ function RegisterForm({ onSubmit, isSubmitting = false }) {
           placeholder="Crea una contraseña segura"
           autoComplete="new-password"
           value={contrasena}
-          onChange={(event) => {
-            setContrasena(event.target.value)
-            if (!mostrarReglas) setMostrarReglas(true)
+          onChange={(e) => {
+            setContrasena(e.target.value)
+            setMostrarReglas(true)
           }}
           minLength={8}
           required
         />
+
         {mostrarReglas && (
           <ul className="auth-form__rules" aria-label="Requisitos de contraseña">
             {validacion.map((regla) => (
               <li
                 key={regla.id}
-                className={regla.cumplida ? 'auth-form__rule is-met' : 'auth-form__rule'}
+                className={
+                  regla.cumplida
+                    ? 'auth-form__rule is-met'
+                    : 'auth-form__rule'
+                }
               >
                 <span className="auth-form__rule-icon" aria-hidden="true">
                   {regla.cumplida ? '✓' : '○'}
@@ -110,13 +184,13 @@ function RegisterForm({ onSubmit, isSubmitting = false }) {
           placeholder="Repite tu contraseña"
           autoComplete="new-password"
           value={confirmacion}
-          onChange={(event) => {
-            setConfirmacion(event.target.value)
+          onChange={(e) => {
+            setConfirmacion(e.target.value)
             setErrorConfirmacion('')
           }}
-          minLength={8}
           required
         />
+
         {errorConfirmacion && (
           <span className="auth-form__error" role="alert">
             {errorConfirmacion}
@@ -127,7 +201,7 @@ function RegisterForm({ onSubmit, isSubmitting = false }) {
       <button
         type="submit"
         className="auth-form__submit"
-        disabled={isSubmitting || (!contrasenaValida && contrasena.length > 0)}
+        disabled={isSubmitting || !contrasenaValida}
       >
         {isSubmitting ? 'Creando cuenta...' : 'Registrar cuenta'}
       </button>

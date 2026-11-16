@@ -1,38 +1,41 @@
+
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import LoginForm from '../components/LoginForm'
 import RegisterForm from '../components/RegisterForm'
-import { saveSession } from '../../../app/session'
 import TuraLimpiaPreview from '../../landing/components/TuraLimpiaAssistant'
 import RobotLogin from '../../../shared/assets/Robot_login.png'
-import { iniciarSesion, registrarUsuario, obtenerMensajeAuth } from '../services/authService'
+import {
+  iniciarSesion,
+  registrarUsuario,
+  obtenerMensajeAuth,
+} from '../services/authService'
 import './AuthPage.css'
 
 function AuthPage({ initialTab = 'login' }) {
   const navigate = useNavigate()
+
   const [modo, setModo] = useState(initialTab)
   const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const esLogin = modo === 'login'
 
   const handleLogin = async (data) => {
     setErrorMessage('')
+    setSuccessMessage('')
     setIsSubmitting(true)
 
     try {
-      const resultado = await iniciarSesion({
-        email: data.correo,
+      await iniciarSesion({
+        identificador: data.correo,
         password: data.contrasena,
       })
 
-      saveSession({
-        nombre: resultado.usuario.nombre,
-        email: resultado.usuario.email,
-        rol: resultado.usuario.rol,
-      })
-
-      navigate('/dashboard', { replace: true })
+      // iniciarSesion ya guarda el token y los datos de sesión.
+      // Por ahora regresamos al inicio porque aún no existe /dashboard.
+      navigate('/', { replace: true })
     } catch (error) {
       setErrorMessage(obtenerMensajeAuth(error))
     } finally {
@@ -42,22 +45,27 @@ function AuthPage({ initialTab = 'login' }) {
 
   const handleRegister = async (data) => {
     setErrorMessage('')
+    setSuccessMessage('')
     setIsSubmitting(true)
 
     try {
       const resultado = await registrarUsuario({
-        nombre: data.nombre,
-        email: data.correo,
-        password: data.contrasena,
+        nombres: data.nombres,
+        apellidos: data.apellidos,
+        nombreUsuario: data.nombreUsuario,
+        correo: data.correo,
+        telefono: data.telefono,
+        contrasena: data.contrasena,
       })
 
-      saveSession({
-        nombre: resultado.usuario.nombre,
-        email: resultado.usuario.email,
-        rol: resultado.usuario.rol,
-      })
+      setSuccessMessage(
+        resultado.mensaje ||
+          'Cuenta creada correctamente. Ya puedes iniciar sesión.',
+      )
 
-      navigate('/dashboard', { replace: true })
+      // El registro no inicia sesión automáticamente.
+      // Cambiamos al formulario de inicio de sesión.
+      setModo('login')
     } catch (error) {
       setErrorMessage(obtenerMensajeAuth(error))
     } finally {
@@ -68,18 +76,28 @@ function AuthPage({ initialTab = 'login' }) {
   const cambiarModo = (nuevoModo) => {
     setModo(nuevoModo)
     setErrorMessage('')
+    setSuccessMessage('')
   }
 
   return (
     <main className="auth-page">
-      <section className="auth-page__visual" aria-label="Presentación de Tura Limpia">
-        <TuraLimpiaPreview className="tura--landing" characterImage={RobotLogin} />
+      <section
+        className="auth-page__visual"
+        aria-label="Presentación de Tura Limpia"
+      >
+        <TuraLimpiaPreview
+          className="tura--landing"
+          characterImage={RobotLogin}
+        />
       </section>
 
       <section className="auth-page__panel">
         <div className="auth-right__inner">
           <header className="auth-right__topbar">
-            <span className="auth-right__portal">Por una Buenaventura más Limpia</span>
+            <span className="auth-right__portal">
+              Por una Buenaventura más Limpia
+            </span>
+
             <span className="auth-right__support">
               <svg
                 width="15"
@@ -100,7 +118,7 @@ function AuthPage({ initialTab = 'login' }) {
               Soporte Asistencial
             </span>
           </header>
-            
+
           <div className="auth-card">
             <Link className="auth-card__back" to="/">
               <svg
@@ -132,6 +150,7 @@ function AuthPage({ initialTab = 'login' }) {
               >
                 Iniciar sesión
               </button>
+
               <button
                 type="button"
                 role="tab"
@@ -142,10 +161,11 @@ function AuthPage({ initialTab = 'login' }) {
                 Registrarse
               </button>
             </div>
-            
+
             <h2 className="auth-card__title">
               {esLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
             </h2>
+
             <p className="auth-card__subtitle">
               {esLogin
                 ? 'Accede a tu espacio de trabajo en Tura Limpia.'
@@ -153,9 +173,15 @@ function AuthPage({ initialTab = 'login' }) {
             </p>
 
             {esLogin ? (
-              <LoginForm onSubmit={handleLogin} isSubmitting={isSubmitting} />
+              <LoginForm
+                onSubmit={handleLogin}
+                isSubmitting={isSubmitting}
+              />
             ) : (
-              <RegisterForm onSubmit={handleRegister} isSubmitting={isSubmitting} />
+              <RegisterForm
+                onSubmit={handleRegister}
+                isSubmitting={isSubmitting}
+              />
             )}
 
             {errorMessage && (
@@ -163,21 +189,44 @@ function AuthPage({ initialTab = 'login' }) {
                 {errorMessage}
               </p>
             )}
-           </div>
-           <footer className="auth-right__footer">
+
+            {successMessage && (
+              <p
+                role="status"
+                style={{
+                  color: '#15803d',
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  padding: '12px 14px',
+                  borderRadius: '8px',
+                  fontSize: '0.9rem',
+                  marginTop: '16px',
+                }}
+              >
+                {successMessage}
+              </p>
+            )}
+          </div>
+
+          <footer className="auth-right__footer">
             <p className="auth-right__footer-txt">
-              Al {esLogin ? 'iniciar sesión en' : 'registrarte en'} Tura Limpia, aceptas nuestros{' '}
+              Al {esLogin ? 'iniciar sesión en' : 'registrarte en'} Tura
+              Limpia, aceptas nuestros{' '}
               <a href="#terminos">Términos y Condiciones</a> y la{' '}
-              <a href="#privacidad">Política de Tratamiento de Datos Personales</a>.
+              <a href="#privacidad">
+                Política de Tratamiento de Datos Personales
+              </a>.
             </p>
+
             <p className="auth-right__footer-copy">
-              © 2026 Tura Limpia Healthcare AI Technologies. Todos los derechos reservados.
+              © 2026 Tura Limpia Healthcare AI Technologies. Todos los
+              derechos reservados.
             </p>
           </footer>
         </div>
       </section>
     </main>
-  );
+  )
 }
 
 export default AuthPage
