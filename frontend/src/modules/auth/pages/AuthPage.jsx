@@ -28,14 +28,18 @@ function AuthPage({ initialTab = 'login' }) {
     setIsSubmitting(true)
 
     try {
-      await iniciarSesion({
+      const resultado = await iniciarSesion({
         identificador: data.correo,
         password: data.contrasena,
       })
 
-      // iniciarSesion ya guarda el token y los datos de sesión.
-      // Por ahora regresamos al inicio porque aún no existe /dashboard.
-      navigate('/', { replace: true })
+      const rol = resultado.usuario?.rol?.toLowerCase()
+
+      if (rol === 'admin') {
+        navigate('/admin/usuarios', { replace: true })
+      } else {
+        navigate('/construccion', { replace: true })
+      }
     } catch (error) {
       setErrorMessage(obtenerMensajeAuth(error))
     } finally {
@@ -64,7 +68,6 @@ function AuthPage({ initialTab = 'login' }) {
       )
 
       // El registro no inicia sesión automáticamente.
-      // Cambiamos al formulario de inicio de sesión.
       setModo('login')
     } catch (error) {
       setErrorMessage(obtenerMensajeAuth(error))

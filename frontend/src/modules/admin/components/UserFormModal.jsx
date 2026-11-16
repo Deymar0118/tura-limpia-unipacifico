@@ -1,71 +1,146 @@
+
 import { useState, useEffect } from 'react'
 import {
   registrarUsuarioAdmin,
   actualizarUsuario,
-  obtenerRoles
+  asignarPerfilUsuario,
+  obtenerRoles,
 } from '../services/usuarioService'
 import './UserFormModal.css'
 
-export default function UserFormModal({ isOpen, onClose, onUserCreated, userToEdit = null }) {
+function obtenerFechaActual() {
+  const fecha = new Date()
+  const anio = fecha.getFullYear()
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+  const dia = String(fecha.getDate()).padStart(2, '0')
+
+  return `${anio}-${mes}-${dia}`
+}
+
+function obtenerRolActual(usuario) {
+  return usuario?.perfil?.rol?.id
+    ? String(usuario.perfil.rol.id)
+    : ''
+}
+
+function formatearError(error) {
+  const detalle = error?.detail
+
+  if (Array.isArray(detalle)) {
+    return detalle
+      .map((item) => {
+        if (typeof item === 'string') return item
+        if (item?.msg) {
+          const campo = Array.isArray(item.loc)
+            ? item.loc.filter((parte) => parte !== 'body').join('. ')
+            : ''
+
+          return campo ? `${campo}: ${item.msg}` : item.msg
+        }
+
+        return JSON.stringify(item)
+      })
+      .join('\n')
+  }
+
+  if (typeof detalle === 'string') {
+    return detalle
+  }
+
+  if (detalle && typeof detalle === 'object') {
+    return (
+      detalle.message ||
+      detalle.mensaje ||
+      JSON.stringify(detalle)
+    )
+  }
+
+  return error?.message || 'Error al comunicarse con el servidor.'
+}
+
+export default function UserFormModal({
+  isOpen,
+  onClose,
+  onUserCreated,
+  userToEdit = null,
+}) {
   const [roles, setRoles] = useState([])
   const [cargando, setCargando] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
   const isEditing = Boolean(userToEdit)
 
-  const [formData, setFormData] = useState(() => {
-    if (userToEdit) {
-      return {
-        nombres: userToEdit.nombres || '',
-        apellidos: userToEdit.apellidos || '',
-        nombre_usuario: userToEdit.nombre_usuario || '',
-        correo: userToEdit.correo || '',
-        password: '',
-        telefono: userToEdit.telefono || '',
-        documento: userToEdit.perfil?.documento || '',
-        rol_id: userToEdit.perfil?.rol?.id ? String(userToEdit.perfil.rol.id) : '',
-        fecha_inicio: userToEdit.perfil?.fecha_inicio || new Date().toISOString().split('T')[0]
-      }
-    }
-    return {
-      nombres: '',
-      apellidos: '',
-      nombre_usuario: '',
-      correo: '',
-      password: '',
-      telefono: '',
-      documento: '',
-      rol_id: '',
-      fecha_inicio: new Date().toISOString().split('T')[0]
-    }
+  const [formData, setFormData] = useState({
+    nombres: '',
+    apellidos: '',
+    nombre_usuario: '',
+    correo: '',
+    password: '',
+    telefono: '',
+    documento: '',
+    rol_id: '',
+    fecha_inicio: obtenerFechaActual(),
+    cargo: '',
   })
 
   useEffect(() => {
     if (!isOpen) return
+
     let cancelado = false
 
-    obtenerRoles().then((data) => {
-      if (!cancelado && data) {
+    async function inicializarFormulario() {
+      setErrorMsg('')
+
+      setFormData({
+        nombres: userToEdit?.nombres || '',
+        apellidos: userToEdit?.apellidos || '',
+        nombre_usuario: userToEdit?.nombre_usuario || '',
+        correo: userToEdit?.correo || '',
+        password: '',
+        telefono: userToEdit?.telefono || '',
+        documento: userToEdit?.perfil?.documento || '',
+        rol_id: obtenerRolActual(userToEdit),
+        fecha_inicio:
+          userToEdit?.perfil?.fecha_inicio || obtenerFechaActual(),
+        cargo: userToEdit?.perfil?.cargo || '',
+      })
+
+      try {
+        const data = await obtenerRoles()
+
+        if (cancelado) return
+
         setRoles(data)
-        setFormData((prev) => {
-          if (!prev.rol_id && data[0]?.id) {
-            return { ...prev, rol_id: String(data[0].id) }
-          }
-          return prev
-        })
+
+        setFormData((prev) => ({
+          ...prev,
+          rol_id: prev.rol_id || (
+            data[0]?.id ? String(data[0].id) : ''
+          ),
+        }))
+      } catch (error) {
+        if (!cancelado) {
+          setErrorMsg(formatearError(error))
+        }
       }
-    })
+    }
+
+    inicializarFormulario()
 
     return () => {
       cancelado = true
     }
-  }, [isOpen])
+  }, [isOpen, userToEdit])
 
   if (!isOpen) return null
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
   }
 
   const handleSubmit = async (e) => {
@@ -76,62 +151,119 @@ export default function UserFormModal({ isOpen, onClose, onUserCreated, userToEd
       setErrorMsg('Nombres y apellidos son obligatorios.')
       return
     }
+
     if (!formData.nombre_usuario.trim()) {
       setErrorMsg('El nombre de usuario es obligatorio.')
       return
     }
+
     if (!formData.correo.trim()) {
       setErrorMsg('El correo electrónico es obligatorio.')
       return
     }
-    if (!isEditing && (!formData.password || formData.password.length < 8)) {
-      setErrorMsg('La contraseña temporal debe tener al menos 8 caracteres.')
-      return
-    }
-    if (!formData.documento.trim()) {
-      setErrorMsg('El documento de identidad (cédula) es obligatorio.')
-      return
-    }
-    if (!formData.rol_id) {
-      setErrorMsg('Debe seleccionar un rol para el perfil.')
+
+    if (!isEditing && formData.password.length < 8) {
+      setErrorMsg('La contraseña debe tener al menos 8 caracteres.')
       return
     }
 
-    const payload = {
+    if (!isEditing && !formData.documento.trim()) {
+      setErrorMsg('El documento de identidad es obligatorio.')
+      return
+    }
+
+    if (!formData.rol_id) {
+      setErrorMsg('Debe seleccionar un rol.')
+      return
+    }
+
+    if (!formData.fecha_inicio) {
+      setErrorMsg('La fecha de inicio es obligatoria.')
+      return
+    }
+
+    const datosPersonales = {
       nombres: formData.nombres.trim(),
       apellidos: formData.apellidos.trim(),
       nombre_usuario: formData.nombre_usuario.trim(),
       correo: formData.correo.trim(),
-      telefono: formData.telefono.trim(),
-      perfil: {
-        documento: formData.documento.trim(),
-        rol_id: Number(formData.rol_id),
-        fecha_inicio: formData.fecha_inicio,
-        estado: true
-      }
     }
 
-    if (formData.password) {
-      payload.password = formData.password
+    if (formData.telefono.trim()) {
+      datosPersonales.telefono = formData.telefono.trim()
     }
+
+    const rolSeleccionado = roles.find(
+      (rol) => String(rol.id) === String(formData.rol_id),
+    )
+
+    const esTrabajador = (
+      rolSeleccionado?.nombre || ''
+    ).toLowerCase().includes('trabajador')
 
     try {
       setCargando(true)
-      let res
-      if (isEditing) {
-        res = await actualizarUsuario(userToEdit.id, payload)
+
+      let resultado
+
+      if (!isEditing) {
+        const payload = {
+          ...datosPersonales,
+          password: formData.password,
+          perfil: {
+            documento: formData.documento.trim(),
+            rol_id: Number(formData.rol_id),
+            fecha_inicio: formData.fecha_inicio,
+            estado: true,
+          },
+        }
+
+        if (esTrabajador && formData.cargo.trim()) {
+          payload.perfil.cargo = formData.cargo.trim()
+        }
+
+        const respuesta = await registrarUsuarioAdmin(payload)
+        resultado = respuesta.data
       } else {
-        res = await registrarUsuarioAdmin(payload)
+        const idUsuario = userToEdit.id
+
+        if (!idUsuario) {
+          throw new Error('No se encontró el identificador del usuario.')
+        }
+
+        resultado = await actualizarUsuario(
+          idUsuario,
+          datosPersonales,
+        )
+
+        const rolActual = obtenerRolActual(userToEdit)
+
+        if (rolActual !== String(formData.rol_id)) {
+          const datosPerfil = {
+            id_rol: Number(formData.rol_id),
+            fecha_inicio: formData.fecha_inicio,
+          }
+
+          if (esTrabajador && formData.cargo.trim()) {
+            datosPerfil.cargo = formData.cargo.trim()
+          }
+
+          resultado = await asignarPerfilUsuario(
+            idUsuario,
+            datosPerfil,
+          )
+        }
       }
 
-      if (res.success || res.id) {
-        onUserCreated(res.data || res, isEditing)
+      if (resultado) {
+        onUserCreated?.(resultado, isEditing)
         onClose()
       } else {
-        setErrorMsg(res.message || 'No se pudo procesar la operación.')
+        setErrorMsg('El servidor no devolvió los datos esperados.')
       }
-    } catch (err) {
-      setErrorMsg(err.detail || err.message || 'Error al comunicarse con el servidor.')
+    } catch (error) {
+      console.error('Error al guardar usuario:', error)
+      setErrorMsg(formatearError(error))
     } finally {
       setCargando(false)
     }
@@ -143,34 +275,50 @@ export default function UserFormModal({ isOpen, onClose, onUserCreated, userToEd
         <div className="modal-header">
           <div>
             <h2 className="modal-title">
-              {isEditing ? 'Editar Funcionario y Rol' : 'Registrar Nuevo Funcionario'}
+              {isEditing
+                ? 'Editar Funcionario y Rol'
+                : 'Registrar Nuevo Funcionario'}
             </h2>
+
             <p className="modal-subtitle">
               {isEditing
-                ? 'Modificar permisos, rol asignado o información del perfil'
+                ? 'Modificar información o asignar un nuevo rol'
                 : 'Asignar credenciales y perfil laboral en Tura Limpia'}
             </p>
           </div>
+
           <button
             type="button"
             className="modal-close-btn"
             onClick={onClose}
             aria-label="Cerrar modal"
+            disabled={cargando}
           >
             &times;
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          {errorMsg && <div className="modal-alert modal-alert--error">{errorMsg}</div>}
+          {errorMsg && (
+            <div
+              className="modal-alert modal-alert--error"
+              role="alert"
+              style={{ whiteSpace: 'pre-line' }}
+            >
+              {errorMsg}
+            </div>
+          )}
 
-          <h3 className="form-section-title">Datos Personales y Acceso</h3>
+          <h3 className="form-section-title">
+            Datos Personales y Acceso
+          </h3>
 
           <div className="form-row">
             <div className="form-group">
               <label className="form-label" htmlFor="nombres">
                 Nombres <span className="required">*</span>
               </label>
+
               <input
                 id="nombres"
                 type="text"
@@ -182,10 +330,12 @@ export default function UserFormModal({ isOpen, onClose, onUserCreated, userToEd
                 required
               />
             </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="apellidos">
                 Apellidos <span className="required">*</span>
               </label>
+
               <input
                 id="apellidos"
                 type="text"
@@ -204,27 +354,28 @@ export default function UserFormModal({ isOpen, onClose, onUserCreated, userToEd
               <label className="form-label" htmlFor="nombre_usuario">
                 Nombre de usuario <span className="required">*</span>
               </label>
+
               <input
                 id="nombre_usuario"
                 type="text"
                 name="nombre_usuario"
                 className="form-input"
-                placeholder="crodriguez"
                 value={formData.nombre_usuario}
                 onChange={handleChange}
                 required
               />
             </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="correo">
                 Correo institucional <span className="required">*</span>
               </label>
+
               <input
                 id="correo"
                 type="email"
                 name="correo"
                 className="form-input"
-                placeholder="carlos@turalimpia.com"
                 value={formData.correo}
                 onChange={handleChange}
                 required
@@ -235,23 +386,28 @@ export default function UserFormModal({ isOpen, onClose, onUserCreated, userToEd
           <div className="form-row">
             <div className="form-group">
               <label className="form-label" htmlFor="password">
-                {isEditing ? 'Nueva contraseña (Opcional)' : 'Contraseña temporal *'}
+                {isEditing
+                  ? 'Nueva contraseña (No disponible)'
+                  : 'Contraseña temporal *'}
               </label>
+
               <input
                 id="password"
                 type="password"
                 name="password"
                 className="form-input"
-                placeholder={isEditing ? 'Dejar en blanco para mantener actual' : 'Mínimo 8 caracteres'}
                 value={formData.password}
                 onChange={handleChange}
                 required={!isEditing}
+                disabled={isEditing}
               />
             </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="telefono">
                 Teléfono de contacto
               </label>
+
               <input
                 id="telefono"
                 type="tel"
@@ -266,28 +422,40 @@ export default function UserFormModal({ isOpen, onClose, onUserCreated, userToEd
 
           <hr className="form-section-divider" />
 
-          <h3 className="form-section-title">Perfil Laboral y Asignación de Rol</h3>
+          <h3 className="form-section-title">
+            Perfil Laboral y Asignación de Rol
+          </h3>
 
           <div className="form-row">
             <div className="form-group">
               <label className="form-label" htmlFor="documento">
-                Documento de identidad (Cédula) <span className="required">*</span>
+                Documento de identidad (Cédula)
+                {!isEditing && <span className="required"> *</span>}
               </label>
+
               <input
                 id="documento"
                 type="text"
                 name="documento"
                 className="form-input"
-                placeholder="1114859632"
                 value={formData.documento}
                 onChange={handleChange}
-                required
+                required={!isEditing}
+                disabled={isEditing && !formData.documento}
               />
+
+              {isEditing && !formData.documento && (
+                <small>
+                  El listado no proporciona el documento. No se modificará.
+                </small>
+              )}
             </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="rol_id">
                 Rol del sistema <span className="required">*</span>
               </label>
+
               <select
                 id="rol_id"
                 name="rol_id"
@@ -296,27 +464,48 @@ export default function UserFormModal({ isOpen, onClose, onUserCreated, userToEd
                 onChange={handleChange}
                 required
               >
-                {roles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.nombre}
+                <option value="">Seleccionar rol</option>
+
+                {roles.map((rol) => (
+                  <option key={rol.id} value={rol.id}>
+                    {rol.nombre}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="fecha_inicio">
-              Fecha de inicio de funciones
-            </label>
-            <input
-              id="fecha_inicio"
-              type="date"
-              name="fecha_inicio"
-              className="form-input"
-              value={formData.fecha_inicio}
-              onChange={handleChange}
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label" htmlFor="fecha_inicio">
+                Fecha de inicio de funciones
+              </label>
+
+              <input
+                id="fecha_inicio"
+                type="date"
+                name="fecha_inicio"
+                className="form-input"
+                value={formData.fecha_inicio}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="cargo">
+                Cargo (si corresponde)
+              </label>
+
+              <input
+                id="cargo"
+                type="text"
+                name="cargo"
+                className="form-input"
+                placeholder="Ej. Operario de recolección"
+                value={formData.cargo}
+                onChange={handleChange}
+              />
+            </div>
           </div>
 
           <div className="modal-actions">
@@ -328,12 +517,17 @@ export default function UserFormModal({ isOpen, onClose, onUserCreated, userToEd
             >
               Cancelar
             </button>
+
             <button
               type="submit"
               className="btn-submit"
               disabled={cargando}
             >
-              {cargando ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Crear Usuario'}
+              {cargando
+                ? 'Guardando...'
+                : isEditing
+                  ? 'Guardar Cambios'
+                  : 'Crear Usuario'}
             </button>
           </div>
         </form>

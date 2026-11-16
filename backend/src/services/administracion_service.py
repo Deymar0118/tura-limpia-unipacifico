@@ -34,6 +34,69 @@ class AdministracionService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    @staticmethod
+    def _error(
+        codigo: str,
+        mensaje: str,
+        codigo_http: int = status.HTTP_409_CONFLICT,
+    ) -> HTTPException:
+        return HTTPException(
+            status_code=codigo_http,
+            detail={
+                "code": codigo,
+                "message": mensaje,
+            },
+        )
+
+    @staticmethod
+    def _es_superadministrador(usuario) -> bool:
+        return bool(usuario.es_superadministrador)
+
+    @staticmethod
+    def _obtener_perfiles_activos(usuario):
+        return [
+            perfil
+            for perfil in usuario.perfiles
+            if perfil.estado == "activo" and perfil.fecha_fin is None
+        ]
+
+    @classmethod
+    def _es_administrador_activo(cls, usuario) -> bool:
+        perfiles_activos = cls._obtener_perfiles_activos(usuario)
+
+        return any(
+            perfil.rol is not None
+            and perfil.rol.nombre_rol.strip().lower() == "admin"
+            for perfil in perfiles_activos
+        )
+
+    async def _proteger_ultimo_administrador(
+        self,
+        usuario,
+    ) -> None:
+        """
+        Impide retirar privilegios al último administrador activo.
+        Las filas de administradores se bloquean antes de contar.
+        """
+
+        if not self._es_administrador_activo(usuario):
+            return
+
+        cantidad = (
+            await AdministracionRepository.contar_administradores_activos(
+                self.db
+            )
+        )
+
+        if cantidad <= 1:
+            raise self._error(
+                "LAST_ADMINISTRATOR",
+                (
+                    "No se puede realizar esta operación porque el usuario "
+                    "es el último administrador activo del sistema."
+                ),
+            )
+
     async def listar_roles(self, solo_activos: bool = True):
         """Consulta los roles disponibles para administración."""
 
@@ -247,70 +310,119 @@ class AdministracionService:
         id_usuario: UUID,
         datos: UsuarioActualizarRequest,
     ) -> UsuarioListadoItem:
-        usuario = (
-            await AdministracionRepository.buscar_usuario_por_id(
-                self.db, id_usuario
-            )
-        )
-
-        if usuario is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "USER_NOT_FOUND",
-                    "message": "No se encontró el usuario solicitado.",
-                },
+        try:
+            # Primero se bloquean los administradores para coordinar
+            # las operaciones que puedan retirar privilegios.
+            await AdministracionRepository.bloquear_administradores_activos(
+                self.db
             )
 
-        cambios = datos.model_dump(exclude_unset=True)
-
-        if not cambios:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "code": "EMPTY_UPDATE",
-                    "message": "Debes enviar al menos un campo.",
-                },
+            usuario = (
+                await AdministracionRepository
+                .obtener_usuario_para_actualizacion(
+                    self.db,
+                    id_usuario,
+                )
             )
 
-        validaciones = (
-            ("correo", "buscar_por_correo", "EMAIL_ALREADY_EXISTS"),
-            (
-                "nombre_usuario",
-                "buscar_por_nombre_usuario",
-                "USERNAME_ALREADY_EXISTS",
-            ),
-            ("documento", "buscar_por_documento", "DOCUMENT_ALREADY_EXISTS"),
-        )
-
-        for campo, metodo, codigo in validaciones:
-            valor = cambios.get(campo)
-
-            if valor is None:
-                continue
-
-            existente = await getattr(
-                AdministracionRepository, metodo
-            )(self.db, valor)
-
-            if (
-                existente is not None
-                and existente.id_usuario != id_usuario
-            ):
+            if usuario is None:
                 raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
+                    status_code=status.HTTP_404_NOT_FOUND,
                     detail={
-                        "code": codigo,
-                        "message": f"El campo {campo} ya está registrado.",
-                        "details": {"field": campo},
+                        "code": "USER_NOT_FOUND",
+                        "message": "No se encontró el usuario solicitado.",
                     },
                 )
 
-        try:
+            cambios = datos.model_dump(exclude_unset=True)
+
+            if not cambios:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={
+                        "code": "EMPTY_UPDATE",
+                        "message": "Debes enviar al menos un campo.",
+                    },
+                )
+
+            # El superadministrador puede actualizar datos personales,
+            # pero no puede ser desactivado mediante esta operación.
+            if self._es_superadministrador(usuario):
+                nuevo_estado = cambios.get("estado")
+
+                if (
+                    nuevo_estado is not None
+                    and nuevo_estado != usuario.estado
+                ):
+                    raise self._error(
+                        "SUPERADMIN_PROTECTED",
+                        (
+                            "No se puede cambiar el estado de la cuenta "
+                            "del superadministrador."
+                        ),
+                        status.HTTP_403_FORBIDDEN,
+                    )
+
+            # Si se intenta desactivar un administrador, se comprueba
+            # que no sea el último administrador activo.
+            nuevo_estado = cambios.get("estado")
+
+            if (
+                nuevo_estado is not None
+                and nuevo_estado != "activo"
+                and usuario.estado == "activo"
+            ):
+                await self._proteger_ultimo_administrador(usuario)
+
+            validaciones = (
+                ("correo", "buscar_por_correo", "EMAIL_ALREADY_EXISTS"),
+                (
+                    "nombre_usuario",
+                    "buscar_por_nombre_usuario",
+                    "USERNAME_ALREADY_EXISTS",
+                ),
+                (
+                    "documento",
+                    "buscar_por_documento",
+                    "DOCUMENT_ALREADY_EXISTS",
+                ),
+            )
+
+            for campo, metodo, codigo in validaciones:
+                valor = cambios.get(campo)
+
+                if valor is None:
+                    continue
+
+                existente = await getattr(
+                    AdministracionRepository, metodo
+                )(self.db, valor)
+
+                if (
+                    existente is not None
+                    and existente.id_usuario != id_usuario
+                ):
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail={
+                            "code": codigo,
+                            "message": (
+                                f"El campo {campo} ya está registrado."
+                            ),
+                            "details": {"field": campo},
+                        },
+                    )
+
             await AdministracionRepository.actualizar_usuario(
-                self.db, usuario, cambios
+                self.db,
+                usuario,
+                cambios,
             )
             await self.db.commit()
+
+        except HTTPException:
+            await self.db.rollback()
+            raise
 
         except IntegrityError as error:
             await self.db.rollback()
@@ -345,6 +457,12 @@ class AdministracionService:
         """Cierra el perfil actual y crea uno nuevo conservando historial."""
 
         try:
+            # Bloquea primero los administradores activos para evitar
+            # cambios concurrentes que dejen el sistema sin admin.
+            await AdministracionRepository.bloquear_administradores_activos(
+                self.db
+            )
+
             usuario = (
                 await AdministracionRepository
                 .obtener_usuario_para_cambio_perfil(
@@ -360,6 +478,16 @@ class AdministracionService:
                         "code": "USER_NOT_FOUND",
                         "message": "No se encontró el usuario solicitado.",
                     },
+                )
+
+            if self._es_superadministrador(usuario):
+                raise self._error(
+                    "SUPERADMIN_PROTECTED",
+                    (
+                        "No se puede cambiar el rol de la cuenta "
+                        "del superadministrador."
+                    ),
+                    status.HTTP_403_FORBIDDEN,
                 )
 
             if usuario.estado != "activo":
@@ -420,11 +548,7 @@ class AdministracionService:
                     },
                 )
 
-            perfiles_activos = [
-                perfil
-                for perfil in usuario.perfiles
-                if perfil.estado == "activo" and perfil.fecha_fin is None
-            ]
+            perfiles_activos = self._obtener_perfiles_activos(usuario)
 
             if len(perfiles_activos) > 1:
                 raise HTTPException(
@@ -453,6 +577,16 @@ class AdministracionService:
                         "message": "El usuario ya tiene asignado ese rol.",
                     },
                 )
+
+            # Si el usuario es el último administrador activo,
+            # no puede perder ese rol.
+            if (
+                perfil_actual is not None
+                and perfil_actual.rol is not None
+                and perfil_actual.rol.nombre_rol.strip().lower() == "admin"
+                and nuevo_rol.nombre_rol.strip().lower() != "admin"
+            ):
+                await self._proteger_ultimo_administrador(usuario)
 
             if datos.fecha_inicio > date.today():
                 raise HTTPException(

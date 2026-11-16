@@ -3,7 +3,16 @@ import uuid
 from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, text
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    text,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -59,6 +68,15 @@ class Perfil(Base):
 class Usuario(Base):
     __tablename__ = "usuarios"
 
+    __table_args__ = (
+        Index(
+            "uq_usuarios_superadministrador",
+            "es_superadministrador",
+            unique=True,
+            postgresql_where=text("es_superadministrador = true"),
+        ),
+    )
+
     id_usuario: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -88,6 +106,11 @@ class Usuario(Base):
     )
     estado: Mapped[str] = mapped_column(
         String(20), nullable=False, server_default=text("'activo'")
+    )
+    es_superadministrador: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default=text("false"),
     )
     fecha_registro: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

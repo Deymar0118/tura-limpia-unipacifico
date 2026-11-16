@@ -1,17 +1,68 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+
 import LandingPage from './modules/landing/pages/LandingPage'
 import AuthPage from './modules/auth/pages/AuthPage'
 import UsersManagementPage from './modules/admin/pages/UsersManagementPage'
+import ConstructionPage from './modules/construction/pages/ConstructionPage'
+
+import { getSession } from './app/session'
+import { getAccessToken } from './shared/api/apiClient'
+
+// Protección de las rutas administrativas
+function AdminRoute({ children }) {
+  const token = getAccessToken()
+  const session = getSession()
+
+  // Si no existe una sesión autenticada, ir al login
+  if (!token || !session) {
+    return <Navigate to="/login" replace />
+  }
+
+  // Solo los administradores pueden entrar
+  if (session.rol?.toLowerCase() !== 'admin') {
+    return <Navigate to="/construccion" replace />
+  }
+
+  return children
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>      
-        <Route path="/login" element={<AuthPage initialTab="login" />} />
-        <Route path="/registro" element={<AuthPage initialTab="registro" />} />
-        <Route path="/admin/usuarios" element={<UsersManagementPage />} />
-        <Route path="/usuarios" element={<UsersManagementPage />} />
-        <Route path="*" element={<LandingPage />} />
+      <Routes>
+        {/* Autenticación */}
+        <Route
+          path="/login"
+          element={<AuthPage initialTab="login" />}
+        />
+
+        <Route
+          path="/registro"
+          element={<AuthPage initialTab="registro" />}
+        />
+
+        {/* Módulo administrativo protegido */}
+        <Route
+          path="/admin/usuarios"
+          element={
+            <AdminRoute>
+              <UsersManagementPage />
+            </AdminRoute>
+          }
+        />
+
+        {/* Ruta para módulos en desarrollo */}
+        <Route
+          path="/construccion"
+          element={<ConstructionPage />}
+        />
+
+        {/* Página principal */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Redirección de rutas desconocidas */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )

@@ -1,218 +1,225 @@
+
 import { apiClient } from '../../../shared/api/apiClient'
 
-// datos de prueba
-let usuariosMock = [
-  {
-    id: 1,
-    nombres: 'Deymar Andres',
-    apellidos: 'Ampudia Rivas',
-    nombre_usuario: 'dampudia',
-    correo: 'deymar.ampudia@turalimpia.com',
-    telefono: '3157894561',
-    activo: true,
-    perfil: {
-      id: 101,
-      documento: '1114859632',
-      fecha_inicio: '2026-02-01',
-      estado: true,
-      rol: { id: 1, nombre: 'Administrador' }
-    }
-  },
-  {
-    id: 2,
-    nombres: 'Santiago Andres',
-    apellidos: 'Guarnizo Patiño',
-    nombre_usuario: 'spatiño',
-    correo: 'saltiago.patiño@turalimpia.com',
-    telefono: '3184561234',
-    activo: true,
-    perfil: {
-      id: 102,
-      documento: '1115896321',
-      fecha_inicio: '2026-02-15',
-      estado: true,
-      rol: { id: 2, nombre: 'Operativo' }
-    }
-  },
-  {
-    id: 3,
-    nombres: 'Jhon Jairo',
-    apellidos: 'Cuero Angulo',
-    nombre_usuario: 'jcuero',
-    correo: 'jhon.cuero@turalimpia.com',
-    telefono: '3129876543',
-    activo: false,
-    perfil: {
-      id: 103,
-      documento: '1116741258',
-      fecha_inicio: '2026-03-01',
-      estado: false,
-      rol: { id: 2, nombre: 'Operativo' }
-    }
-  }
-]
+// --------------------------------------------------
+// Adaptadores: backend FastAPI -> formato del frontend
+// --------------------------------------------------
 
-const rolesMock = [
-  { id: 1, nombre: 'Administrador', descripcion: 'Acceso total y configuración del sistema' },
-  { id: 2, nombre: 'Operativo', descripcion: 'Coordinación y despacho de rutas y flota' },
-  { id: 3, nombre: 'Consulta', descripcion: 'Visualización general de tableros e informes' }
-]
+function normalizarRol(rol) {
+  if (!rol) return null
 
-/**
- * consulta de usuarios
- */
-export async function obtenerUsuarios({ page = 1, limit = 10, q = '', rol_id = '' } = {}) {
-  try {
-    const query = { page, limit }
-    if (q) query.q = q
-    if (rol_id) query.rol_id = rol_id
-
-    const respuesta = await apiClient('/administracion/usuarios', {
-      metodo: 'GET',
-      query
-    })
-    return respuesta
-  } catch {
-    let filtrados = [...usuariosMock]
-    if (q) {
-      const term = q.toLowerCase()
-      filtrados = filtrados.filter(
-        (u) =>
-          u.nombres.toLowerCase().includes(term) ||
-          u.apellidos.toLowerCase().includes(term) ||
-          u.correo.toLowerCase().includes(term) ||
-          u.nombre_usuario.toLowerCase().includes(term) ||
-          u.perfil.documento.includes(term)
-      )
-    }
-    if (rol_id) {
-      filtrados = filtrados.filter((u) => u.perfil.rol.id === Number(rol_id))
-    }
-
-    return {
-      success: true,
-      message: 'Usuarios consultados correctamente (Modo simulación)',
-      data: filtrados,
-      pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total: filtrados.length,
-        total_pages: Math.ceil(filtrados.length / limit) || 1
-      }
-    }
+  return {
+    ...rol,
+    id: rol.id_rol ?? rol.id,
+    nombre: rol.nombre_rol ?? rol.nombre,
   }
 }
+
+function normalizarPerfil(perfil) {
+  if (!perfil) return null
+
+  return {
+    ...perfil,
+    id: perfil.id_perfil ?? perfil.id,
+    documento: perfil.documento ?? null,
+    fecha_inicio: perfil.fecha_inicio,
+    estado: perfil.estado,
+    rol: normalizarRol(perfil.rol),
+  }
+}
+
+// Identificar si un perfil está activo
+function perfilEstaActivo(perfil) {
+  return (
+    perfil.estado === true ||
+    perfil.estado === 1 ||
+    perfil.estado === 'activo' ||
+    perfil.estado === 'true'
+  )
+}
+
+// Seleccionar el perfil más reciente
+function seleccionarPerfilVigente(perfiles) {
+  if (!perfiles.length) return null
+
+  const perfilesActivos = perfiles.filter(perfilEstaActivo)
+
+  const candidatos = perfilesActivos.length
+    ? perfilesActivos
+    : perfiles
+
+  return [...candidatos].sort((a, b) => {
+    const fechaA = new Date(a.fecha_inicio || 0).getTime()
+    const fechaB = new Date(b.fecha_inicio || 0).getTime()
+
+    return fechaB - fechaA
+  })[0]
+}
+
+function normalizarUsuario(usuario) {
+  if (!usuario) return null
+
+  const perfilesOriginales = Array.isArray(usuario.perfiles)
+    ? usuario.perfiles
+    : usuario.perfil
+      ? [usuario.perfil]
+      : []
+
+  const perfiles = perfilesOriginales.map(normalizarPerfil)
+
+  const perfilActual = seleccionarPerfilVigente(perfiles)
+
+  const activo =
+    typeof usuario.activo === 'boolean'
+      ? usuario.activo
+      : usuario.estado === 'activo'
+
+  return {
+    ...usuario,
+    id: usuario.id_usuario ?? usuario.id,
+    activo,
+    estado: usuario.estado ?? (activo ? 'activo' : 'inactivo'),
+    perfil: perfilActual,
+    perfiles,
+  }
+}
+
+function normalizarPaginacion(paginacion = {}) {
+  return {
+    page: paginacion.pagina ?? 1,
+    limit: paginacion.por_pagina ?? 10,
+    total: paginacion.total_registros ?? 0,
+    total_pages: paginacion.total_paginas ?? 0,
+  }
+}
+
+// --------------------------------------------------
+// Usuarios
+// --------------------------------------------------
+
+export async function obtenerUsuarios({
+  page = 1,
+  limit = 10,
+} = {}) {
+  const respuesta = await apiClient('/administracion/usuarios', {
+    query: {
+      pagina: page,
+      por_pagina: limit,
+    },
+  })
+
+  return {
+    success: respuesta.success ?? true,
+    data: (respuesta.data || []).map(normalizarUsuario),
+    pagination: normalizarPaginacion(respuesta.paginacion),
+  }
+}
+
+// --------------------------------------------------
+// Roles
+// --------------------------------------------------
 
 export async function obtenerRoles() {
-  try {
-    const respuesta = await apiClient('/administracion/roles', { metodo: 'GET' })
-    return respuesta.data || respuesta
-  } catch {
-    return rolesMock
-  }
+  const respuesta = await apiClient('/administracion/roles', {
+    query: {
+      solo_activos: true,
+    },
+  })
+
+  const roles = Array.isArray(respuesta)
+    ? respuesta
+    : respuesta.data || []
+
+  return roles.map(normalizarRol)
 }
 
-/**
- * Registra un nuevo usuario
- */
+// --------------------------------------------------
+// Crear usuario
+// --------------------------------------------------
+
 export async function registrarUsuarioAdmin(datos) {
-  try {
-    const respuesta = await apiClient('/administracion/usuarios', {
-      metodo: 'POST',
-      body: datos
-    })
-    return respuesta
-  } catch (error) {
-    if (error?.status === 0 || !error?.status) {
-      const rolEncontrado = rolesMock.find((r) => r.id === Number(datos.perfil.rol_id)) || {
-        id: datos.perfil.rol_id,
-        nombre: 'Operativo'
-      }
+  const respuesta = await apiClient('/administracion/usuarios', {
+    metodo: 'POST',
+    body: datos,
+  })
 
-      const nuevoUsuario = {
-        id: usuariosMock.length + 1,
-        nombres: datos.nombres,
-        apellidos: datos.apellidos,
-        nombre_usuario: datos.nombre_usuario,
-        correo: datos.correo,
-        telefono: datos.telefono || '',
-        activo: true,
-        perfil: {
-          id: 100 + usuariosMock.length + 1,
-          documento: datos.perfil.documento,
-          fecha_inicio: datos.perfil.fecha_inicio,
-          estado: datos.perfil.estado !== undefined ? datos.perfil.estado : true,
-          rol: rolEncontrado
-        }
-      }
-      usuariosMock.unshift(nuevoUsuario)
-
-      return {
-        success: true,
-        message: 'Usuario registrado correctamente (Modo simulación)',
-        data: nuevoUsuario
-      }
-    }
-    throw error
+  return {
+    ...respuesta,
+    data: normalizarUsuario(respuesta.data),
   }
 }
 
-/**
- * Actualiza los datos o el rol
- */
+// --------------------------------------------------
+// Actualizar información del usuario
+// --------------------------------------------------
+
 export async function actualizarUsuario(id, datos) {
-  try {
-    const respuesta = await apiClient(`/administracion/usuarios/${id}`, {
-      metodo: 'PUT',
-      body: datos
-    })
-    return respuesta
-  } catch (error) {
-    if (error?.status === 0 || !error?.status) {
-      usuariosMock = usuariosMock.map((u) => {
-        if (u.id === id) {
-          const rolEncontrado =
-            rolesMock.find((r) => r.id === Number(datos.perfil?.rol_id)) || u.perfil?.rol
+  const payload = {}
 
-          return {
-            ...u,
-            nombres: datos.nombres ?? u.nombres,
-            apellidos: datos.apellidos ?? u.apellidos,
-            nombre_usuario: datos.nombre_usuario ?? u.nombre_usuario,
-            correo: datos.correo ?? u.correo,
-            telefono: datos.telefono ?? u.telefono,
-            activo: datos.activo !== undefined ? datos.activo : u.activo,
-            perfil: {
-              ...u.perfil,
-              documento: datos.perfil?.documento ?? u.perfil?.documento,
-              fecha_inicio: datos.perfil?.fecha_inicio ?? u.perfil?.fecha_inicio,
-              estado: datos.perfil?.estado !== undefined ? datos.perfil.estado : u.perfil?.estado,
-              rol: rolEncontrado
-            }
-          }
-        }
-        return u
-      })
+  const camposPermitidos = [
+    'nombres',
+    'apellidos',
+    'nombre_usuario',
+    'correo',
+    'telefono',
+    'documento',
+    'id_barrio',
+  ]
 
-      const usuarioActualizado = usuariosMock.find((u) => u.id === id)
-      return {
-        success: true,
-        message: 'Usuario y rol actualizados correctamente (Modo simulación)',
-        data: usuarioActualizado
-      }
+  camposPermitidos.forEach((campo) => {
+    if (datos[campo] !== undefined) {
+      payload[campo] = datos[campo]
     }
-    throw error
+  })
+
+  if (datos.estado !== undefined) {
+    payload.estado = datos.estado
+  } else if (typeof datos.activo === 'boolean') {
+    payload.estado = datos.activo ? 'activo' : 'inactivo'
   }
+
+  const respuesta = await apiClient(
+    `/administracion/usuarios/${id}`,
+    {
+      metodo: 'PUT',
+      body: payload,
+    },
+  )
+
+  return normalizarUsuario(respuesta)
 }
+
+// --------------------------------------------------
+// Asignar un nuevo perfil o cambiar el rol
+// --------------------------------------------------
+
+export async function asignarPerfilUsuario(id, datos) {
+  const payload = {
+    id_rol: Number(datos.id_rol ?? datos.rol_id),
+    fecha_inicio: datos.fecha_inicio,
+  }
+
+  if (datos.cargo?.trim()) {
+    payload.cargo = datos.cargo.trim()
+  }
+
+  const respuesta = await apiClient(
+    `/administracion/usuarios/${id}/perfiles`,
+    {
+      metodo: 'POST',
+      body: payload,
+    },
+  )
+
+  return normalizarUsuario(respuesta)
+}
+
+// --------------------------------------------------
+// Activar / desactivar usuario
+// --------------------------------------------------
 
 export async function toggleEstadoUsuario(id, estadoActual) {
-  try {
-    return await apiClient(`/administracion/usuarios/${id}`, {
-      metodo: 'PUT',
-      body: { activo: !estadoActual }
-    })
-  } catch {
-    usuariosMock = usuariosMock.map((u) => (u.id === id ? { ...u, activo: !estadoActual } : u))
-    return { success: true, message: 'Estado actualizado' }
-  }
+  return actualizarUsuario(id, {
+    estado: estadoActual ? 'inactivo' : 'activo',
+  })
 }

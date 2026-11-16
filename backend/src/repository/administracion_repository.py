@@ -178,6 +178,73 @@ class AdministracionRepository:
         return resultado.scalar_one_or_none()
 
     @staticmethod
+    async def obtener_usuario_para_actualizacion(
+        db: AsyncSession,
+        id_usuario: UUID,
+    ) -> Usuario | None:
+        """Bloquea la fila del usuario durante una actualización."""
+
+        consulta = (
+            select(Usuario)
+            .options(
+                selectinload(Usuario.perfiles).selectinload(Perfil.rol)
+            )
+            .where(Usuario.id_usuario == id_usuario)
+            .with_for_update()
+        )
+
+        resultado = await db.execute(consulta)
+        return resultado.scalar_one_or_none()
+
+    @staticmethod
+    async def bloquear_administradores_activos(
+        db: AsyncSession,
+    ) -> list[UUID]:
+        """
+        Bloquea las filas de los administradores activos para
+        evitar modificaciones concurrentes de sus privilegios.
+        """
+
+        consulta = (
+            select(Usuario.id_usuario)
+            .join(Perfil, Perfil.id_usuario == Usuario.id_usuario)
+            .join(Rol, Rol.id_rol == Perfil.id_rol)
+            .where(
+                Usuario.estado == "activo",
+                Perfil.estado == "activo",
+                Perfil.fecha_fin.is_(None),
+                func.lower(Rol.nombre_rol) == "admin",
+            )
+            .order_by(Usuario.id_usuario)
+            .with_for_update(of=Usuario)
+        )
+
+        resultado = await db.execute(consulta)
+        return list(resultado.scalars().all())
+
+    @staticmethod
+    async def contar_administradores_activos(
+        db: AsyncSession,
+    ) -> int:
+        """Cuenta los usuarios con perfil de administrador vigente."""
+
+        consulta = (
+            select(func.count(func.distinct(Usuario.id_usuario)))
+            .select_from(Usuario)
+            .join(Perfil, Perfil.id_usuario == Usuario.id_usuario)
+            .join(Rol, Rol.id_rol == Perfil.id_rol)
+            .where(
+                Usuario.estado == "activo",
+                Perfil.estado == "activo",
+                Perfil.fecha_fin.is_(None),
+                func.lower(Rol.nombre_rol) == "admin",
+            )
+        )
+
+        resultado = await db.execute(consulta)
+        return resultado.scalar_one()
+
+    @staticmethod
     async def actualizar_usuario(
         db: AsyncSession,
         usuario: Usuario,
