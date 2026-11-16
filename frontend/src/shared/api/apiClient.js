@@ -3,7 +3,7 @@ import { clearSession } from '../../app/session'
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL || 'http://localhost:8000'
-).replace(/\/$/, '')
+).replace(/\/+$/, '')
 
 const TOKENS_KEY = 'turalimpia.tokens'
 
