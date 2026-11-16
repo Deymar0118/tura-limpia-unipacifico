@@ -68,6 +68,21 @@ El sistema se implementará bajo una Arquitectura RESTful, dividiendo la soluci�
 
 ---
 
+# Raiz
+
+### Estructura de carpetas
+
+```text
+tura-limpia-unipacifico/
+├── README.md
+├── backend/
+├── frontend/
+└── docs/
+
+```
+
+---
+
 # Backend
 
 ### Estructura de Carpetas
