@@ -1,12 +1,17 @@
-import React from 'react';
-import  LandingPage  from './modules/landing/pages/LandingPage';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import LandingPage from './modules/landing/pages/LandingPage'
+import AuthPage from './modules/auth/pages/AuthPage'
 
 function App() {
   return (
-    <div>
-      <LandingPage />
-    </div>
-  );
+    <BrowserRouter>
+      <Routes>      
+        <Route path="/login" element={<AuthPage initialTab="login" />} />
+        <Route path="/registro" element={<AuthPage initialTab="registro" />} />
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
-export default App;
+export default App

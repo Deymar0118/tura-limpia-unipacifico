@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import TuraLimpiaLogo from '../../../shared/ui/TuraLimpiaLogo';
+import { Link } from 'react-router-dom'
+import TuraLimpiaLogo from '../../../shared/assets/TuraLimpiaLogo.png';
 import './LandingHeader.css'
 
 const navItems = [
   { label: 'Inicio', href: '#inicio' },
-  { label: 'El Contexto', href: '#contexto' },
+  { label: 'Contexto', href: '#contexto' },
   { label: 'Solución', href: '#solucion' },
   { label: 'Características', href: '#caracteristicas' },
   { label: 'Impacto y Metas', href: '#impacto' },
@@ -21,7 +22,7 @@ export const LandingHeader = () => {
       <nav className="landing-nav" aria-label="Navegación principal">
         <a className="landing-nav__brand" href="#inicio">
           <span className="landing-nav__logo">
-            <TuraLimpiaLogo />
+            <img src={TuraLimpiaLogo} alt="" width="32" height="32" />
           </span>
           <span className="landing-nav__name">Tura Limpia</span>
         </a>
@@ -29,9 +30,9 @@ export const LandingHeader = () => {
         <ul className={open ? 'landing-nav__links is-open' : 'landing-nav__links'}>
 
             <li className="landing-nav__mobile-action">
-              <a className="landing-nav__login" href="/login">
-                Iniciar sesión
-              </a>
+              <Link className="landing-nav__login" to="/login" onClick={() => setOpen(false)}>
+                Iniciar Sesión
+              </Link>
            </li>
 
           {navItems.map((item) => (
@@ -44,9 +45,9 @@ export const LandingHeader = () => {
         </ul>
 
         <div className="landing-nav__actions">
-          <a className="landing-nav__login" href="/login">
+          <Link className="landing-nav__login" to="/login">
             Iniciar sesión
-          </a>
+          </Link>
 
           <button
             type="button"

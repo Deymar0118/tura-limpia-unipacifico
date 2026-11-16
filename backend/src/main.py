@@ -15,7 +15,7 @@ from src.routers import administracion, auth
 settings = get_settings()
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("turalimpia.main")
 
 
 @asynccontextmanager
@@ -24,7 +24,9 @@ async def lifespan(app: FastAPI):
 
     logger.info("Iniciando TuraLimpia API...")
 
-    if settings.entorno == "produccion":
+    if settings.es_produccion:
+        settings.validar_produccion()
+
         if settings.debug:
             raise RuntimeError(
                 "DEBUG no puede estar habilitado en producción."
@@ -36,13 +38,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="TuraLimpia API",
+    title=settings.app_name,
     description=(
-        "API REST para el sistema de Gestión y Optimización "
-        "de la Recolección y Transporte de Residuos Sólidos "
-        "en Buenaventura. Proyecto Tura Limpia."
+        "API REST para el Sistema de Gestión y Optimización de la "
+        "Recolección y Transporte de Residuos Sólidos en Buenaventura."
     ),
-    version="1.0.0",
+    version=settings.app_version,
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
@@ -50,27 +51,42 @@ app = FastAPI(
 )
 
 
-# CORS
+# CORS: permite los dominios configurados en ALLOWED_ORIGINS.
+origins = [
+    origin.strip()
+    for origin in settings.allowed_origins.split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins,
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 
-# Encabezados de seguridad
 @app.middleware("http")
 async def security_headers(
     request: Request,
     call_next,
 ) -> Response:
+    """Agrega encabezados de seguridad HTTP."""
+
     response = await call_next(request)
 
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["X-XSS-Protection"] = "0"
+    response.headers["Referrer-Policy"] = (
+        "strict-origin-when-cross-origin"
+    )
+
+    if settings.es_produccion:
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=63072000; includeSubDomains"
+        )
 
     return response
 
@@ -80,21 +96,16 @@ app.include_router(auth.router)
 app.include_router(administracion.router)
 
 
-# Endpoint raíz
-@app.get(
-    "/",
-    tags=["Root"],
-    summary="Estado general de la API",
-)
+@app.get("/", tags=["Root"], summary="Estado general de la API")
 async def root():
     return {
         "mensaje": "Bienvenido a TuraLimpia API",
-        "version": "1.0.0",
+        "version": settings.app_version,
         "documentacion": "/docs",
+        "status": "active",
     }
 
 
-# Healthcheck
 @app.get(
     "/healthcheck",
     tags=["Health"],
@@ -110,8 +121,8 @@ async def healthcheck(
         return {
             "status": "ok",
             "database": "connected",
-            "app": "TuraLimpia API",
-            "version": "1.0.0",
+            "app": settings.app_name,
+            "version": settings.app_version,
         }
 
     except Exception:
