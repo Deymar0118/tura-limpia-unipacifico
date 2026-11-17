@@ -1,9 +1,9 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 import LandingPage from './modules/landing/pages/LandingPage'
 import AuthPage from './modules/auth/pages/AuthPage'
 import UsersManagementPage from './modules/admin/pages/UsersManagementPage'
+import AdminDashboardPage from './modules/admin/pages/AdminDashboardPage'
 import ConstructionPage from './modules/construction/pages/ConstructionPage'
 
 import { getSession } from './app/session'
@@ -42,9 +42,36 @@ function App() {
           element={<AuthPage initialTab="registro" />}
         />
 
-        {/* Módulo administrativo protegido */}
+        {/* Módulos administrativos protegidos */}
+        <Route
+          path="/dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboardPage />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboardPage />
+            </AdminRoute>
+          }
+        />
+
         <Route
           path="/admin/usuarios"
+          element={
+            <AdminRoute>
+              <UsersManagementPage />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/usuarios"
           element={
             <AdminRoute>
               <UsersManagementPage />

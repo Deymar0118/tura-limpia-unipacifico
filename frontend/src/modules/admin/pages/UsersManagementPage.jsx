@@ -208,8 +208,8 @@ export default function UsersManagementPage() {
         </div>
 
         <div className="admin-header-actions">
-          <Link to="/" className="btn-back-link">
-            ← Volver al Inicio
+          <Link to="/dashboard" className="btn-back-link">
+            ← Volver al Dashboard
           </Link>
 
           <button
