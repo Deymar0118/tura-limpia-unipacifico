@@ -36,7 +36,7 @@ function AuthPage({ initialTab = 'login' }) {
       const rol = resultado.usuario?.rol?.toLowerCase()
 
       if (rol === 'admin') {
-        navigate('/admin/usuarios', { replace: true })
+        navigate('/dashboard', { replace: true })
       } else {
         navigate('/construccion', { replace: true })
       }
@@ -67,7 +67,6 @@ function AuthPage({ initialTab = 'login' }) {
           'Cuenta creada correctamente. Ya puedes iniciar sesión.',
       )
 
-      // El registro no inicia sesión automáticamente.
       setModo('login')
     } catch (error) {
       setErrorMessage(obtenerMensajeAuth(error))

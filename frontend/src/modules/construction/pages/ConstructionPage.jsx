@@ -1,17 +1,32 @@
 
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { getUsuario } from '../../../app/session'
 
 export default function ConstructionPage() {
+  const location = useLocation()
   const usuario = getUsuario()
 
-  const rol = usuario?.rol || 'usuario'
+  const rol = (usuario?.rol || 'usuario').toLowerCase()
 
   const nombreRol = {
+    admin: 'Administrador',
     gerente: 'Gerente',
     trabajador: 'Trabajador',
     ciudadano: 'Ciudadano',
   }
+
+  // Información recibida desde el Dashboard
+  const modulo = location.state?.modulo
+
+  const titulo = modulo?.titulo || 'Módulo en construcción'
+  const historias = modulo?.historias || 'Próximamente'
+  const descripcion =
+    modulo?.descripcion ||
+    'Este módulo todavía se encuentra en desarrollo. Estamos preparando nuevas funcionalidades para mejorar la gestión de residuos sólidos en Buenaventura.'
+
+  const funcionalidades = modulo?.funcionalidades || []
+
+  const rutaRegreso = rol === 'admin' ? '/dashboard' : '/'
 
   return (
     <main
@@ -29,7 +44,7 @@ export default function ConstructionPage() {
         style={{
           width: '100%',
           maxWidth: '760px',
-          padding: '55px 35px',
+          padding: '45px 35px',
           textAlign: 'center',
           background: '#ffffff',
           borderRadius: '24px',
@@ -39,16 +54,16 @@ export default function ConstructionPage() {
       >
         <div
           style={{
-            width: '100px',
-            height: '100px',
-            margin: '0 auto 25px',
+            width: '90px',
+            height: '90px',
+            margin: '0 auto 22px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             borderRadius: '50%',
             background: '#dcfce7',
             color: '#15803d',
-            fontSize: '48px',
+            fontSize: '42px',
           }}
         >
           🚧
@@ -72,35 +87,105 @@ export default function ConstructionPage() {
 
         <h1
           style={{
-            margin: '22px 0 14px',
+            margin: '22px 0 12px',
             color: '#0f172a',
-            fontSize: 'clamp(28px, 5vw, 42px)',
+            fontSize: 'clamp(27px, 5vw, 38px)',
             fontWeight: '800',
             lineHeight: '1.2',
           }}
         >
-          ¡Estamos trabajando en ello!
+          {titulo}
         </h1>
+
+        <span
+          style={{
+            display: 'inline-block',
+            marginBottom: '20px',
+            padding: '7px 14px',
+            borderRadius: '20px',
+            background: '#fef3c7',
+            color: '#92400e',
+            fontSize: '12px',
+            fontWeight: '700',
+          }}
+        >
+          En desarrollo · {historias}
+        </span>
 
         <p
           style={{
-            maxWidth: '550px',
+            maxWidth: '570px',
             margin: '0 auto',
             color: '#64748b',
-            fontSize: '16px',
+            fontSize: '15px',
             lineHeight: '1.8',
           }}
         >
-          El módulo al que intentas acceder todavía se encuentra
-          en desarrollo. Nuestro equipo está preparando nuevas
-          funcionalidades para mejorar la gestión de residuos
-          sólidos en Buenaventura.
+          {descripcion}
         </p>
+
+        {funcionalidades.length > 0 && (
+          <div
+            style={{
+              margin: '30px auto',
+              padding: '24px',
+              textAlign: 'left',
+              borderRadius: '16px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+            }}
+          >
+            <h2
+              style={{
+                margin: '0 0 18px',
+                color: '#0f172a',
+                fontSize: '17px',
+                fontWeight: '800',
+              }}
+            >
+              Funcionalidades previstas
+            </h2>
+
+            <ul
+              style={{
+                display: 'grid',
+                gap: '13px',
+                margin: 0,
+                padding: 0,
+                listStyle: 'none',
+              }}
+            >
+              {funcionalidades.map((funcionalidad, index) => (
+                <li
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '10px',
+                    color: '#475569',
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                  }}
+                >
+                  <span
+                    style={{
+                      color: '#16a34a',
+                      fontWeight: '800',
+                    }}
+                  >
+                    ✓
+                  </span>
+                  {funcionalidad}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div
           style={{
             maxWidth: '420px',
-            margin: '32px auto',
+            margin: '28px auto',
             padding: '18px',
             borderRadius: '14px',
             background: '#f8fafc',
@@ -146,7 +231,7 @@ export default function ConstructionPage() {
           }}
         >
           <Link
-            to="/"
+            to={rutaRegreso}
             style={{
               display: 'inline-block',
               padding: '13px 24px',
@@ -158,20 +243,20 @@ export default function ConstructionPage() {
               textDecoration: 'none',
             }}
           >
-            Volver al inicio
+            ← Volver al Dashboard
           </Link>
         </div>
 
         <footer
           style={{
-            marginTop: '45px',
+            marginTop: '40px',
             paddingTop: '20px',
             borderTop: '1px solid #e2e8f0',
             color: '#94a3b8',
             fontSize: '12px',
           }}
         >
-          © 2026 Tura Limpia. Por una Buenaventura más limpia.
+          © {new Date().getFullYear()} Tura Limpia. Por una Buenaventura más limpia.
         </footer>
       </section>
     </main>
