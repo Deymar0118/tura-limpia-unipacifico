@@ -36,10 +36,10 @@ let usuariosMock = [
   },
   {
     id: 3,
-    nombres: 'Jhon Jairo',
-    apellidos: 'Cuero Angulo',
-    nombre_usuario: 'jcuero',
-    correo: 'jhon.cuero@turalimpia.com',
+    nombres: 'Gonzalo',
+    apellidos: 'Lucio',
+    nombre_usuario: 'glucio',
+    correo: 'Gonzalo.Lucio@turalimpia.com',
     telefono: '3129876543',
     activo: false,
     perfil: {

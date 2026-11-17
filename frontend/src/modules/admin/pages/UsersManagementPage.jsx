@@ -108,8 +108,8 @@ export default function UsersManagementPage() {
           <h1 className="admin-header-title">Gestión de Usuarios</h1>
         </div>
         <div className="admin-header-actions">
-          <Link to="/" className="btn-back-link">
-            ← Volver al Inicio
+          <Link to="/dashboard" className="btn-back-link">
+            ← Volver al Dashboard
           </Link>
           <button
             type="button"
